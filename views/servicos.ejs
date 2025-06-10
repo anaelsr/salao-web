@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Serviços</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+  <div class="container mt-4 mb-4">
+    <h2>Serviços Cadastrados</h2>
+    <a href="/dashboard" class="btn btn-secondary mb-3">Voltar ao Painel</a>
+    <% if (error) { %>
+      <div class="alert alert-danger"><%= error %></div>
+    <% } %>
+    <form method="post" action="/servicos" class="mb-4">
+      <div class="row g-2">
+        <div class="col-12 col-md-6">
+          <input type="text" class="form-control" name="nome" placeholder="Nome do Serviço" required>
+        </div>
+        <div class="col-12 col-md-4">
+          <input type="number" step="0.01" class="form-control" name="preco" placeholder="Preço (ex: 50.00)" required>
+        </div>
+        <div class="col-12 col-md-2">
+          <button type="submit" class="btn btn-success w-100">Adicionar</button>
+        </div>
+      </div>
+    </form>
+    <div class="table-responsive">
+      <table class="table table-bordered table-hover align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>ID</th>
+            <th>Nome</th>
+            <th>Preço (R$)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (servicos.length === 0) { %>
+            <tr>
+              <td colspan="3" class="text-center">Nenhum serviço cadastrado.</td>
+            </tr>
+          <% } else { %>
+            <% servicos.forEach(s => { %>
+              <tr>
+                <td><%= s.id %></td>
+                <td><%= s.nome %></td>
+                <td><%= s.preco.toFixed(2) %></td>
+              </tr>
+            <% }) %>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</body>
+</html>

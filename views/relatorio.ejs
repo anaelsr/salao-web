@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Relatório de Agendamentos</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background: #f8f9fa;
+      font-size: 18px;
+    }
+    h2 {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+    }
+    @media (max-width: 767px) {
+      .container {
+        padding: 0 3px !important;
+      }
+      h2 {
+        font-size: 1.3rem !important;
+      }
+      .table th, .table td {
+        font-size: 15px !important;
+        padding: 8px 4px !important;
+      }
+      .btn, .form-control {
+        min-height: 46px;
+        font-size: 17px;
+      }
+      .row.g-2 {
+        gap: 5px 0 !important;
+      }
+    }
+    @media (max-width: 575px) {
+      h2 {
+        font-size: 1.1rem !important;
+      }
+      .form-control, .btn {
+        font-size: 16px;
+        min-height: 42px;
+      }
+      .btn {
+        padding: 8px 0 !important;
+      }
+      .table {
+        font-size: 15px !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container mt-4 mb-4 px-2">
+
+
+    <h2 class="mb-3">Relatório de Agendamentos</h2>
+    <a href="/dashboard" class="btn btn-secondary mb-2" style="min-width:180px; font-size:18px; font-weight:500;">
+        Voltar ao Painel
+      </a>
+    <form class="row g-2 mb-3 align-items-end" method="get" action="/relatorio">
+      <div class="col-12 col-md-6">
+        <input type="text" name="cliente" class="form-control" placeholder="Filtrar por cliente" value="<%= clienteBusca %>">
+      </div>
+      <div class="col-6 col-md-2">
+        <button class="btn btn-primary w-100" type="submit">Filtrar</button>
+      </div>
+      <div class="col-6 col-md-2">
+        <a href="/relatorio" class="btn btn-secondary w-100">Limpar</a>
+      </div>
+    </form>
+
+    <div class="table-responsive">
+      <table class="table table-bordered table-hover mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>Cliente</th>
+            <th>Serviço</th>
+            <th>Valor</th>
+            <th>Data/Hora</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% let total = 0; %>
+          <% if (agendamentos.length === 0) { %>
+            <tr><td colspan="5" class="text-center">Nenhum agendamento encontrado.</td></tr>
+          <% } else { %>
+            <% agendamentos.forEach(a => { 
+              let servico = servicos.find(s => s.nome === a.servico);
+              let valor = servico ? servico.preco : 0;
+              total += valor;
+            %>
+              <tr>
+                <td><%= a.cliente %></td>
+                <td><%= a.servico %></td>
+                <td>R$ <%= valor.toFixed(2) %></td>
+                <td><%= a.datahora.replace('T', ' ') %></td>
+                <td><%= a.status || "pendente" %></td>
+              </tr>
+            <% }); %>
+          <% } %>
+        </tbody>
+        <tfoot>
+          <tr>
+            <th colspan="2">Total</th>
+            <th colspan="3">R$ <%= total.toFixed(2) %></th>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </div>
+</body>
+</html>

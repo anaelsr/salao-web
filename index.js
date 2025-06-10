@@ -11,7 +11,7 @@ app.use(express.static("public"));
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 
-// Cria tabelas se não existirem
+// Cria tabelas se não existirem (NÃO usa nascimento)
 db.serialize(() => {
   db.run(`CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -24,21 +24,39 @@ db.serialize(() => {
     cliente TEXT,
     telefone TEXT,
     cpf TEXT,
-    nascimento TEXT,
     servico TEXT,
     datahora TEXT,
-    funcionaria TEXT
+    funcionaria TEXT,
+    status TEXT DEFAULT 'pendente'
   )`);
 
-  // Usuários fixos
+  db.run(`CREATE TABLE IF NOT EXISTS clientes (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nome TEXT,
+    telefone TEXT,
+    cpf TEXT UNIQUE
+  )`);
+
   db.run(
     `INSERT OR IGNORE INTO users (username, password) VALUES 
       ('marcones', '1234'),
       ('analaura', '5678'),
       ('luiza', '9999')
-    `,
+    `
   );
+
+  db.run(`CREATE TABLE IF NOT EXISTS servicos (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nome TEXT UNIQUE,
+    preco REAL
+  )`);
+  
+
+
+
 });
+
+
 
 // SESSÃO
 app.use(
@@ -102,54 +120,83 @@ app.post("/register", (req, res) => {
   );
 });
 
-// Painel de agendamentos
+// Painel de agendamentos — agora busca os serviços!
 app.get("/dashboard", (req, res) => {
   if (!req.session.user) return res.redirect("/login");
-  db.all(
-    "SELECT * FROM agendamentos ORDER BY datahora",
-    [],
-    (err, agendamentos) => {
+
+  const filtro = req.query.filtro || "todos";
+  let sql = "SELECT * FROM agendamentos";
+  let params = [];
+
+  if (filtro === "dia") {
+    sql += " WHERE date(datahora) = date('now', 'localtime')";
+  } else if (filtro === "semana") {
+    sql += " WHERE date(datahora) >= date('now', '-6 days', 'localtime')";
+  } else if (filtro === "mes") {
+    sql += " WHERE strftime('%Y-%m', datahora) = strftime('%Y-%m', 'now', 'localtime')";
+  }
+  sql += " ORDER BY datahora";
+
+  db.all(sql, params, (err, agendamentos) => {
+    if (err) {
+      return res.render("dashboard", {
+        user: req.session.user,
+        agendamentos: [],
+        servicos: [],
+        filtro,
+        error: "Erro ao buscar agendamentos.",
+        success: null,
+      });
+    }
+    db.all("SELECT * FROM servicos ORDER BY nome", [], (err2, servicos) => {
+      if (err2) servicos = [];
       res.render("dashboard", {
         user: req.session.user,
-        agendamentos: agendamentos,
+        agendamentos,
+        servicos,
+        filtro,
         error: null,
         success: null,
       });
-    },
-  );
+    });
+  });
 });
 
-// Cadastro de agendamento (tratamento do CPF incluído)
+
+
+// Cadastro de agendamento
 app.post("/agendar", (req, res) => {
   if (!req.session.user) return res.redirect("/login");
 
-  let { cliente, telefone, cpf, nascimento, servico, datahora, funcionaria } =
-    req.body;
+  let { cliente, telefone, cpf, servico, datahora, funcionaria } = req.body;
 
-  // Remove máscara do CPF
   cpf = cpf.replace(/[^\d]/g, "");
 
-  if (
-    !cliente ||
-    !telefone ||
-    !cpf ||
-    !nascimento ||
-    !servico ||
-    !datahora ||
-    !funcionaria
-  ) {
+  if (!cliente || !telefone || !cpf || !servico || !datahora || !funcionaria) {
     return res.redirect("/dashboard?error=Preencha todos os campos");
   }
 
+  // Cadastra o cliente sem nascimento
   db.run(
-    "INSERT INTO agendamentos (cliente, telefone, cpf, nascimento, servico, datahora, funcionaria) VALUES (?, ?, ?, ?, ?, ?, ?)",
-    [cliente, telefone, cpf, nascimento, servico, datahora, funcionaria],
+    "INSERT OR IGNORE INTO clientes (nome, telefone, cpf) VALUES (?, ?, ?)",
+    [cliente, telefone, cpf],
     function (err) {
       if (err) {
-        return res.redirect("/dashboard?error=Erro ao agendar");
+        console.log("Erro ao inserir cliente:", err);
       }
-      res.redirect("/dashboard?success=Agendamento realizado!");
-    },
+      // Agora cadastra o agendamento sem nascimento
+      db.run(
+        "INSERT INTO agendamentos (cliente, telefone, cpf, servico, datahora, funcionaria) VALUES (?, ?, ?, ?, ?, ?)",
+        [cliente, telefone, cpf, servico, datahora, funcionaria],
+        function (err) {
+          if (err) {
+            console.log("Erro ao agendar:", err);
+            return res.redirect("/dashboard?error=Erro ao agendar");
+          }
+          res.redirect("/dashboard?success=Agendamento realizado!");
+        }
+      );
+    }
   );
 });
 
@@ -173,31 +220,53 @@ app.get("/logout", (req, res) => {
 // Página inicial redireciona para login
 app.get("/", (req, res) => res.redirect("/login"));
 
-// Consulta do cliente por CPF e Nascimento
+// Rota para autocomplete de clientes (usada pelo dashboard.ejs)
+app.get('/clientes/autocomplete', (req, res) => {
+  const termo = (req.query.q || '').trim();
+  if (termo.length < 2) return res.json([]);
+  db.all(
+    "SELECT * FROM clientes WHERE nome LIKE ? LIMIT 10",
+    [`%${termo}%`],
+    (err, rows) => {
+      if (err) return res.json([]);
+      res.json(rows);
+    }
+  );
+});
+
+// Página de consulta de clientes
+app.get("/clientes", (req, res) => {
+  if (!req.session.user) return res.redirect("/login");
+  db.all("SELECT * FROM clientes ORDER BY nome", [], (err, clientes) => {
+    if (err) {
+      return res.render("clientes", { clientes: [], error: "Erro ao buscar clientes." });
+    }
+    res.render("clientes", { clientes, error: null });
+  });
+});
+
+// Página de consulta do horário do cliente (GET)
 app.get("/meuhorario", (req, res) => {
   res.render("meuhorario", {
     horarios: null,
     cpf: "",
-    nascimento: "",
     error: null,
   });
 });
 
+// Consulta do horário do cliente (POST)
 app.post("/meuhorario", (req, res) => {
-  let { cpf, nascimento } = req.body;
-
-  // Remove máscara aqui também
+  let { cpf } = req.body;
   cpf = cpf.replace(/[^\d]/g, "");
 
   db.all(
-    "SELECT * FROM agendamentos WHERE cpf = ? AND nascimento = ?",
-    [cpf, nascimento],
+    "SELECT * FROM agendamentos WHERE cpf = ? ORDER BY datahora",
+    [cpf],
     (err, rows) => {
       if (err) {
         return res.render("meuhorario", {
           horarios: null,
           cpf,
-          nascimento,
           error: "Erro ao buscar agendamentos.",
         });
       }
@@ -205,19 +274,72 @@ app.post("/meuhorario", (req, res) => {
         return res.render("meuhorario", {
           horarios: null,
           cpf,
-          nascimento,
-          error: "Nenhum horário encontrado para esses dados.",
+          error: "Nenhum horário encontrado para esse CPF.",
         });
       }
       res.render("meuhorario", {
         horarios: rows,
         cpf,
-        nascimento,
         error: null,
       });
-    },
+    }
   );
 });
+
+// Página para listar e cadastrar serviços
+app.get("/servicos", (req, res) => {
+  if (!req.session.user) return res.redirect("/login");
+  db.all("SELECT * FROM servicos ORDER BY nome", [], (err, servicos) => {
+    if (err) {
+      return res.render("servicos", { servicos: [], error: "Erro ao buscar serviços." });
+    }
+    res.render("servicos", { servicos, error: null });
+  });
+});
+
+// Cadastro de novo serviço (POST)
+app.post("/servicos", (req, res) => {
+  if (!req.session.user) return res.redirect("/login");
+  const { nome, preco } = req.body;
+  if (!nome || !preco) {
+    return res.redirect("/servicos?error=Preencha todos os campos");
+  }
+  db.run(
+    "INSERT INTO servicos (nome, preco) VALUES (?, ?)",
+    [nome, preco],
+    function (err) {
+      if (err) {
+        return res.redirect("/servicos?error=Erro ao cadastrar serviço (já existe ou dados inválidos)");
+      }
+      res.redirect("/servicos");
+    }
+  );
+});
+
+app.get('/relatorio', (req, res) => {
+  if (!req.session.user) return res.redirect("/login");
+  const { cliente } = req.query;
+  let sql = "SELECT * FROM agendamentos";
+  let params = [];
+
+  if (cliente && cliente.trim() !== "") {
+    sql += " WHERE cliente LIKE ?";
+    params.push(`%${cliente}%`);
+  }
+
+  sql += " ORDER BY datahora";
+
+  db.all(sql, params, (err, agendamentos) => {
+    if (err) return res.render("relatorio", { agendamentos: [], clienteBusca: cliente || "", servicos: [] });
+
+    // Buscar os serviços para mostrar valor no relatório
+    db.all("SELECT * FROM servicos", [], (err2, servicos) => {
+      if (err2) servicos = [];
+      res.render("relatorio", { agendamentos, clienteBusca: cliente || "", servicos });
+    });
+  });
+});
+
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, '0.0.0.0', () => {
