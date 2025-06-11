@@ -377,6 +377,73 @@ app.post("/funcionarios", (req, res) => {
   );
 });
 
+app.post("/funcionarios/status/:id", (req, res) => {
+  if (!req.session.user) return res.redirect("/login");
+  const id = req.params.id;
+  const { status } = req.body;
+  db.run(
+    "UPDATE funcionarios SET status = ? WHERE id = ?",
+    [status, id],
+    function (err) {
+      if (err) {
+        // Se quiser, pode passar o erro na tela
+        return res.redirect("/funcionarios?error=Erro ao atualizar status");
+      }
+      res.redirect("/funcionarios");
+    }
+  );
+});
+
+// Editar funcionário
+app.post("/funcionarios/edit/:id", (req, res) => {
+  if (!req.session.user) return res.redirect("/login");
+  const id = req.params.id;
+  const { nome, cargo } = req.body;
+  db.run(
+    "UPDATE funcionarios SET nome = ?, cargo = ? WHERE id = ?",
+    [nome, cargo, id],
+    function (err) {
+      if (err) {
+        return res.redirect("/funcionarios?error=Erro ao editar funcionário");
+      }
+      res.redirect("/funcionarios");
+    }
+  );
+});
+
+// Excluir funcionário
+app.post("/funcionarios/delete/:id", (req, res) => {
+  if (!req.session.user) return res.redirect("/login");
+  const id = req.params.id;
+  db.run(
+    "DELETE FROM funcionarios WHERE id = ?",
+    [id],
+    function (err) {
+      if (err) {
+        return res.redirect("/funcionarios?error=Erro ao excluir funcionário");
+      }
+      res.redirect("/funcionarios");
+    }
+  );
+});
+
+// Atualizar status do agendamento
+app.post('/atualizar-status/:id', (req, res) => {
+  if (!req.session.user) return res.redirect("/login");
+  const id = req.params.id;
+  const { status } = req.body;
+  db.run(
+    "UPDATE agendamentos SET status = ? WHERE id = ?",
+    [status, id],
+    function (err) {
+      if (err) {
+        return res.redirect("/dashboard?error=Erro ao atualizar status");
+      }
+      res.redirect("/dashboard");
+    }
+  );
+});
+
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, '0.0.0.0', () => {

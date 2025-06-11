@@ -9,50 +9,78 @@
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
   <style>
-    body { background: #f8f9fa; font-size: 18px; }
-    .card { border-radius: 18px; box-shadow: 0 2px 12px rgba(0,0,0,0.04);}
-    .form-control, .form-select, .btn { min-height: 48px; font-size: 1rem; border-radius: 12px;}
-    .btn { padding: 0.5rem 1.2rem; font-weight: 500;}
+    body {
+      background: linear-gradient(135deg, #f8f9fa 70%, #e0eaff 100%);
+      min-height: 100vh;
+      font-size: 18px;
+    }
+    .main-box {
+      max-width: 1200px;
+      margin: 2rem auto 2rem auto;
+      padding: 2rem 1rem;
+    }
+    .card {
+      border-radius: 18px;
+      box-shadow: 0 2px 14px rgba(50,80,200,0.07);
+      padding: 2rem 1.5rem;
+    }
+    .form-control, .form-select, .btn {
+      min-height: 48px;
+      font-size: 1rem;
+      border-radius: 12px;
+    }
+    .btn { padding: 0.5rem 1.2rem; font-weight: 500; }
+    .btn-primary, .btn-success {
+      background: linear-gradient(90deg, #3366ff 70%, #5be3f5 100%);
+      border: none;
+      font-weight: 600;
+    }
+    .btn-success { background: linear-gradient(90deg, #2ecc40 80%, #33ffe7 100%); color: #222;}
+    .table-responsive { border-radius: 12px; }
+    .table { border-radius: 10px !important; background: #fafdff; }
+    .table th, .table td { vertical-align: middle; }
+    .badge {
+      font-size: 1rem;
+      border-radius: 8px;
+    }
+    /* Mobile Cards */
     @media (max-width: 991px) {
       .desktop-table { display: none !important; }
       .mobile-cards { display: block !important; }
-      .container { padding: 0 2px !important;}
+      .main-box { padding: 0; }
     }
     @media (min-width: 992px) {
       .desktop-table { display: block !important; }
       .mobile-cards { display: none !important; }
     }
-    .mobile-cards .card { margin-bottom: 16px; border: 1.5px solid #e5e5e5; }
+    .mobile-cards .card { margin-bottom: 16px; border: 1.5px solid #e5e5e5; border-radius: 14px;}
     .mobile-cards .card-body { padding: 18px 14px; }
     .mobile-cards .badge { font-size: 1rem; margin-bottom: 4px; border-radius: 8px;}
     .mobile-cards .btn { font-size: 1rem; border-radius: 10px; }
-    .bg-warning-subtle {
-      background-color: #fff9e6 !important;
-    }
     @media (max-width: 575px) {
-      .form-label, .form-control, .form-select, .btn, th, td { font-size: 16px !important;}
-      h2, h4 { font-size: 22px !important;}
-      .card { border-radius: 12px;}
-      .container { padding: 0 1px !important;}
+      .form-label, .form-control, .form-select, .btn, th, td { font-size: 15px !important;}
+      h2, h4 { font-size: 20px !important;}
+      .card { border-radius: 10px; padding: 1.2rem 0.6rem;}
+      .main-box { padding: 0 2px !important;}
     }
   </style>
 </head>
 <body>
-  <div class="container mt-4 mb-4 px-2">
-    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap">
-      <h2 class="mb-0">Painel de Agendamentos</h2>
-      <div class="mt-2 mt-md-0 d-flex align-items-center gap-2 flex-wrap">
-        <a href="/clientes" class="btn btn-outline-primary me-2">
-          <i class="bi bi-people"></i> Consultar Clientes
+  <div class="main-box">
+    <!-- Top Navigation -->
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+      <h2 class="mb-0"><i class="bi bi-calendar-check"></i> Painel de Agendamentos</h2>
+      <div class="d-flex align-items-center gap-2 flex-wrap">
+        <a href="/clientes" class="btn btn-outline-primary">
+          <i class="bi bi-people"></i> Clientes
         </a>
-        <a href="/servicos" class="btn btn-outline-secondary me-2">
+        <a href="/servicos" class="btn btn-outline-secondary">
           <i class="bi bi-gear"></i> Serviços
         </a>
-        
-        <a href="/funcionarios" class="btn btn-outline-info me-2">
+        <a href="/funcionarios" class="btn btn-outline-info">
           <i class="bi bi-person-badge"></i> Funcionários
         </a>
-        <a href="/relatorio" class="btn btn-outline-dark me-2">
+        <a href="/relatorio" class="btn btn-outline-dark">
           <i class="bi bi-bar-chart"></i> Relatório
         </a>
         <span class="me-3">Olá, <b><%= user %></b></span>
@@ -60,9 +88,9 @@
       </div>
     </div>
 
-    <!-- Formulário -->
-    <div class="card p-3 mb-4">
-      <h4 class="mb-3">Novo Agendamento</h4>
+    <!-- Formulário de Novo Agendamento -->
+    <div class="card mb-4">
+      <h4 class="mb-3"><i class="bi bi-plus-circle"></i> Novo Agendamento</h4>
       <form method="post" action="/agendar" onsubmit="return validarFormulario();">
         <div class="row g-3">
           <div class="col-12 col-md-6 position-relative">
@@ -83,29 +111,10 @@
             <select class="form-select" id="servico" name="servico" required>
               <option value="">Selecione o serviço</option>
               <% servicos.forEach(s => { %>
-                <option value="<%= s.nome %>" data-valor="<%= s.preco %>"><%= s.nome %> - R$ <%= s.preco.toFixed(2) %></option>
-                <% }); %>
+                <option value="<%= s.nome %>"><%= s.nome %> - R$ <%= s.preco.toFixed(2) %></option>
+              <% }); %>
             </select>
-            
           </div>
-
-          <div class="col-12 col-md-6">
-            <label for="valor" class="form-label">Valor a cobrar</label>
-            <input type="number" class="form-control" id="valor" name="valor" min="0" step="0.01" required>
-          </div>
-          
-          <div class="col-12 col-md-6">
-            <label for="valor_pago" class="form-label">Valor pago</label>
-            <input type="number" class="form-control" id="valor_pago" name="valor_pago" min="0" step="0.01">
-          </div>
-          <div class="col-12 col-md-6 d-flex align-items-center" style="gap:10px">
-            <label class="form-label mb-0">Pago?</label>
-            <div class="form-check ms-2">
-              <input class="form-check-input" type="checkbox" value="sim" id="foi_pago" name="foi_pago">
-              <label class="form-check-label" for="foi_pago">Sim</label>
-            </div>
-          </div>
-
           <div class="col-12 col-md-6">
             <label for="datahora" class="form-label">Data e Hora</label>
             <input type="datetime-local" class="form-control" id="datahora" name="datahora" required>
@@ -118,24 +127,26 @@
                 <option value="<%= f.nome %>"><%= f.nome %> <%= f.cargo ? '- ' + f.cargo : '' %></option>
               <% }) %>
             </select>
-
-
           </div>
           <div class="col-12 col-md-6 align-self-end">
-            <button type="submit" class="btn btn-success w-100 mt-1">Agendar</button>
+            <button type="submit" class="btn btn-success w-100 mt-1">
+              <i class="bi bi-check2-circle"></i> Agendar
+            </button>
           </div>
         </div>
       </form>
     </div>
 
-    <!-- Tabela Desktop -->
+    <!-- Filtros -->
     <div class="mb-3 d-flex flex-wrap gap-2">
       <a href="/dashboard?filtro=dia" class="btn btn-outline-primary <% if (filtro === 'dia') { %>active<% } %>">Hoje</a>
       <a href="/dashboard?filtro=semana" class="btn btn-outline-primary <% if (filtro === 'semana') { %>active<% } %>">Semana</a>
       <a href="/dashboard?filtro=mes" class="btn btn-outline-primary <% if (filtro === 'mes') { %>active<% } %>">Mês</a>
       <a href="/dashboard?filtro=todos" class="btn btn-outline-primary <% if (filtro === 'todos' || !filtro) { %>active<% } %>">Todos</a>
     </div>
-    <div class="card p-3 desktop-table mb-4">
+
+    <!-- Tabela Desktop -->
+    <div class="card desktop-table mb-4">
       <h4 class="mb-3">Todos os Agendamentos</h4>
       <div class="table-responsive">
         <table class="table table-bordered table-hover align-middle mb-0">
@@ -145,9 +156,6 @@
               <th>Telefone</th>
               <th>CPF</th>
               <th>Serviço</th>
-              <th>Valor</th>
-              <th>Valor pago</th>
-              <th>Pago?</th>
               <th>Data/Hora</th>
               <th>Funcionária</th>
               <th>Status</th>
@@ -155,23 +163,17 @@
             </tr>
           </thead>
           <tbody>
-            <% agendamentos.forEach(a => {
-                 const isVencido = a.status === 'pendente' && new Date(a.datahora) < new Date();
-            %>
-              <tr class="<%= isVencido ? 'table-warning' : '' %>">
+          <% if (agendamentos.length === 0) { %>
+            <tr>
+              <td colspan="8" class="text-center">Nenhum agendamento cadastrado.</td>
+            </tr>
+          <% } else { %>
+            <% agendamentos.forEach(a => { %>
+              <tr>
                 <td><%= a.cliente %></td>
                 <td><%= a.telefone %></td>
                 <td><%= a.cpf || "" %></td>
                 <td><%= a.servico %></td>
-                <td><%= a.valor ? 'R$ ' + Number(a.valor).toFixed(2) : '' %></td>
-                <td><%= a.valor_pago ? 'R$ ' + Number(a.valor_pago).toFixed(2) : '' %></td>
-                <td>
-                  <% if (a.foi_pago === true || a.foi_pago === "sim" || a.foi_pago === 1) { %>
-                    <span class="badge bg-success">Sim</span>
-                  <% } else { %>
-                    <span class="badge bg-secondary">Não</span>
-                  <% } %>
-                </td>
                 <td><%= a.datahora.replace("T", " ") %></td>
                 <td>
                   <% if (a.funcionaria === "marcones") { %> Sogra (Marcones)
@@ -182,25 +184,21 @@
                 <td>
                   <form method="post" action="/atualizar-status/<%= a.id %>" style="display:inline;">
                     <select name="status" class="form-select form-select-sm d-inline" style="width:auto;display:inline-block" onchange="this.form.submit()">
-                      <option value="pendente" <%= a.status === "pendente" ? "selected" : "" %>>
-                        <%= isVencido ? "Aguardando (Vencido)" : "Pendente" %>
-                      </option>
+                      <option value="pendente" <%= a.status === "pendente" ? "selected" : "" %>>Pendente</option>
                       <option value="compareceu" <%= a.status === "compareceu" ? "selected" : "" %>>Compareceu</option>
                       <option value="nao_compareceu" <%= a.status === "nao_compareceu" ? "selected" : "" %>>Não compareceu</option>
                     </select>
                   </form>
                 </td>
                 <td>
-                  <form method="post" action="/apagar/<%= a.id %>" onsubmit="<%= a.status === 'compareceu' ? 'return false;' : 'return confirm(\'Tem certeza que deseja apagar este agendamento?\')' %>">
-                    <button type="submit" class="btn btn-sm btn-danger" <%= a.status === 'compareceu' ? 'disabled style="opacity:0.6;cursor:not-allowed;"' : '' %>>
-                      Apagar
-                    </button>
+                  <form method="post" action="/apagar/<%= a.id %>" onsubmit="return confirm('Tem certeza que deseja apagar este agendamento?')">
+                    <button type="submit" class="btn btn-sm btn-danger">Apagar</button>
                   </form>
                 </td>
               </tr>
             <% }); %>
+          <% } %>
           </tbody>
-          
         </table>
       </div>
     </div>
@@ -211,18 +209,16 @@
       <% if (agendamentos.length === 0) { %>
         <div class="alert alert-light text-center">Nenhum agendamento cadastrado.</div>
       <% } else { %>
-        <% agendamentos.forEach(a => { 
-             const isVencido = a.status === 'pendente' && new Date(a.datahora) < new Date();
-        %>
-          <div class="card <%= isVencido ? 'border-warning bg-warning-subtle' : '' %>">
+        <% agendamentos.forEach(a => { %>
+          <div class="card">
             <div class="card-body">
               <div class="d-flex justify-content-between align-items-center mb-2">
                 <span class="fw-bold" style="font-size: 1.1em;"><%= a.cliente %></span>
                 <span class="badge 
                   <%= a.status === 'compareceu' ? 'bg-success' : 
                       a.status === 'nao_compareceu' ? 'bg-danger' : 
-                      isVencido ? 'bg-warning text-dark' : 'bg-warning text-dark' %>">
-                  <%= isVencido ? "Aguardando (Vencido)" : (a.status.charAt(0).toUpperCase() + a.status.slice(1).replace('_',' ')) %>
+                      'bg-warning text-dark' %>">
+                  <%= a.status.charAt(0).toUpperCase() + a.status.slice(1).replace('_',' ') %>
                 </span>
               </div>
               <div class="mb-1">
@@ -239,18 +235,13 @@
               </div>
               <form method="post" action="/atualizar-status/<%= a.id %>" class="mb-2">
                 <select name="status" class="form-select form-select-sm" onchange="this.form.submit()">
-                  <option value="pendente" <%= a.status === "pendente" ? "selected" : "" %>>
-                    <%= isVencido ? "Aguardando (Vencido)" : "Pendente" %>
-                  </option>
+                  <option value="pendente" <%= a.status === "pendente" ? "selected" : "" %>>Pendente</option>
                   <option value="compareceu" <%= a.status === "compareceu" ? "selected" : "" %>>Compareceu</option>
                   <option value="nao_compareceu" <%= a.status === "nao_compareceu" ? "selected" : "" %>>Não compareceu</option>
                 </select>
               </form>
-              <form method="post" action="/apagar/<%= a.id %>" 
-                onsubmit="<%= a.status === 'compareceu' ? 'return false;' : 'return confirm(\'Tem certeza que deseja apagar este agendamento?\')' %>">
-                <button type="submit" class="btn btn-danger w-100" <%= a.status === 'compareceu' ? 'disabled style="opacity:0.6;cursor:not-allowed;"' : '' %>>
-                  Apagar
-                </button>
+              <form method="post" action="/apagar/<%= a.id %>" onsubmit="return confirm('Tem certeza que deseja apagar este agendamento?')">
+                <button type="submit" class="btn btn-danger w-100">Apagar</button>
               </form>
             </div>
           </div>
@@ -259,56 +250,7 @@
     </div>
   </div>
 
-  <!-- MÁSCARAS E VALIDAÇÃO -->
-  <script>
-    $(document).ready(function() {
-      $('#telefone').mask('(00) 00000-0000');
-      $('#cpf').mask('000.000.000-00', {reverse: true});
-    });
-    function validarCPF(cpf) {
-      cpf = cpf.replace(/[^\d]+/g,'');
-      if (cpf.length !== 11 || /^(\d)\1+$/.test(cpf)) return false;
-      let soma = 0, resto;
-      for (let i = 1; i <= 9; i++) soma += parseInt(cpf.substring(i-1, i)) * (11 - i);
-      resto = (soma * 10) % 11;
-      if (resto === 10 || resto === 11) resto = 0;
-      if (resto !== parseInt(cpf.substring(9, 10))) return false;
-      soma = 0;
-      for (let i = 1; i <= 10; i++) soma += parseInt(cpf.substring(i-1, i)) * (12 - i);
-      resto = (soma * 10) % 11;
-      if (resto === 10 || resto === 11) resto = 0;
-      if (resto !== parseInt(cpf.substring(10, 11))) return false;
-      return true;
-    }
-    function validarFormulario() {
-      let cpf = document.getElementById('cpf').value;
-      if (!validarCPF(cpf)) {
-        alert('CPF inválido!');
-        document.getElementById('cpf').focus();
-        return false;
-      }
-      // Validação da data/hora
-      let dataSelecionada = document.getElementById('datahora').value;
-      if (!dataSelecionada) {
-        alert('Selecione uma data e hora!');
-        document.getElementById('datahora').focus();
-        return false;
-      }
-      let dataAgendamento = new Date(dataSelecionada);
-      let agora = new Date();
-      agora.setSeconds(0,0);
-      if (dataAgendamento < agora) {
-        // Pergunta ao usuário se quer continuar mesmo assim
-        let resposta = confirm('A data/hora selecionada já passou. Deseja agendar mesmo assim para registrar o atendimento?');
-        if (!resposta) {
-          document.getElementById('datahora').focus();
-          return false;
-        }
-      }
-      return true;
-    }
-  </script>
-
+  <!-- Máscaras e validação -->
   <script>
     $(document).ready(function() {
       $('#telefone').mask('(00) 00000-0000');
@@ -330,9 +272,9 @@
             }
             let html = clientes.map(c => `
               <a href="#" class="list-group-item list-group-item-action"
-                data-telefone="${c.telefone}"
-                data-cpf="${c.cpf}"
-                data-nome="${c.nome}">
+                 data-telefone="${c.telefone}"
+                 data-cpf="${c.cpf}"
+                 data-nome="${c.nome}">
                 ${c.nome} <small>(${c.telefone})</small>
               </a>
             `).join('');
@@ -356,19 +298,48 @@
       });
     });
 
-    
-  </script>
-
-<script>
-  $(document).ready(function() {
-    $('#servico').on('change', function() {
-      var preco = $(this).find(':selected').data('valor');
-      if (preco !== undefined) {
-        $('#valor').val(Number(preco).toFixed(2));
+    function validarCPF(cpf) {
+      cpf = cpf.replace(/[^\d]+/g,'');
+      if (cpf.length !== 11 || /^(\d)\1+$/.test(cpf)) return false;
+      let soma = 0, resto;
+      for (let i = 1; i <= 9; i++) soma += parseInt(cpf.substring(i-1, i)) * (11 - i);
+      resto = (soma * 10) % 11;
+      if (resto === 10 || resto === 11) resto = 0;
+      if (resto !== parseInt(cpf.substring(9, 10))) return false;
+      soma = 0;
+      for (let i = 1; i <= 10; i++) soma += parseInt(cpf.substring(i-1, i)) * (12 - i);
+      resto = (soma * 10) % 11;
+      if (resto === 10 || resto === 11) resto = 0;
+      if (resto !== parseInt(cpf.substring(10, 11))) return false;
+      return true;
+    }
+    function validarFormulario() {
+      let cpf = document.getElementById('cpf').value;
+      if (!validarCPF(cpf)) {
+        alert('CPF inválido!');
+        document.getElementById('cpf').focus();
+        return false;
       }
-    });
-  });
+      let dataSelecionada = document.getElementById('datahora').value;
+      if (!dataSelecionada) {
+        alert('Selecione uma data e hora!');
+        document.getElementById('datahora').focus();
+        return false;
+      }
+      let dataAgendamento = new Date(dataSelecionada);
+      let agora = new Date();
+      agora.setSeconds(0,0);
+      if (dataAgendamento < agora) {
+        // Pergunta ao usuário se quer continuar mesmo assim
+        let resposta = confirm('A data/hora selecionada já passou. Deseja agendar mesmo assim para registrar o atendimento?');
+        if (!resposta) {
+          document.getElementById('datahora').focus();
+          return false;
+        }
+      }
+      return true;
+    }
   </script>
-  
 </body>
 </html>
+
