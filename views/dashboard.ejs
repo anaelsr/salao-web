@@ -38,6 +38,8 @@
   <div class="container mt-4 mb-4 px-2">
     <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap">
       <h2 class="mb-0">Painel de Agendamentos</h2>
+    
+    
       <div class="mt-2 mt-md-0 d-flex align-items-center gap-2 flex-wrap">
         <a href="/clientes" class="btn btn-outline-primary me-2">
           <i class="bi bi-people"></i> Consultar Clientes
@@ -45,17 +47,23 @@
         <a href="/servicos" class="btn btn-outline-secondary me-2">
           <i class="bi bi-gear"></i> Serviços
         </a>
+        <a href="/funcionarios" class="btn btn-outline-info me-2">
+          <i class="bi bi-person-badge"></i> Funcionários
+        </a>
         <a href="/relatorio" class="btn btn-outline-dark me-2">
           <i class="bi bi-bar-chart"></i> Relatório
         </a>
         <span class="me-3">Olá, <b><%= user %></b></span>
         <a href="/logout" class="btn btn-outline-danger btn-sm">Sair</a>
       </div>
+      
     </div>
 
     <!-- Formulário -->
     <div class="card p-3 mb-4">
       <h4 class="mb-3">Novo Agendamento</h4>
+
+
       <form method="post" action="/agendar" onsubmit="return validarFormulario();">
         <div class="row g-3">
           <div class="col-12 col-md-6 position-relative">
@@ -85,12 +93,12 @@
             <input type="datetime-local" class="form-control" id="datahora" name="datahora" required>
           </div>
           <div class="col-12 col-md-6">
-            <label for="funcionaria" class="form-label">Funcionária</label>
+            <label for="funcionaria" class="form-label">Funcionário(a)</label>
             <select class="form-select" id="funcionaria" name="funcionaria" required>
               <option value="">Selecione</option>
-              <option value="marcones">Sogra (Marcones)</option>
-              <option value="analaura">Ana Laura</option>
-              <option value="luiza">Luiza</option>
+              <% funcionarios.forEach(f => { %>
+                <option value="<%= f.nome %>"><%= f.nome %> <%= f.cargo ? '- ' + f.cargo : '' %></option>
+              <% }) %>
             </select>
           </div>
           <div class="col-12 col-md-6 align-self-end">
@@ -98,6 +106,10 @@
           </div>
         </div>
       </form>
+      
+
+
+
     </div>
 
     <!-- Tabela Desktop -->

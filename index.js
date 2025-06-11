@@ -51,7 +51,14 @@ db.serialize(() => {
     preco REAL
   )`);
   
-
+  db.run(`CREATE TABLE IF NOT EXISTS funcionarios (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nome TEXT,
+    cargo TEXT,
+    status TEXT DEFAULT 'Ativo'
+  )`);
+  
+  
 
 
 });
@@ -138,25 +145,18 @@ app.get("/dashboard", (req, res) => {
   sql += " ORDER BY datahora";
 
   db.all(sql, params, (err, agendamentos) => {
-    if (err) {
-      return res.render("dashboard", {
-        user: req.session.user,
-        agendamentos: [],
-        servicos: [],
-        filtro,
-        error: "Erro ao buscar agendamentos.",
-        success: null,
-      });
-    }
     db.all("SELECT * FROM servicos ORDER BY nome", [], (err2, servicos) => {
-      if (err2) servicos = [];
-      res.render("dashboard", {
-        user: req.session.user,
-        agendamentos,
-        servicos,
-        filtro,
-        error: null,
-        success: null,
+      db.all("SELECT * FROM funcionarios WHERE status = 'Ativo' ORDER BY nome", [], (err3, funcionarios) => {
+        // Sempre manda funcionários para o EJS!
+        res.render("dashboard", {
+          user: req.session.user,
+          agendamentos: err ? [] : agendamentos,
+          servicos: err2 ? [] : servicos,
+          funcionarios: err3 ? [] : funcionarios,
+          filtro,
+          error: err ? "Erro ao buscar agendamentos." : null,
+          success: null,
+        });
       });
     });
   });
@@ -338,6 +338,43 @@ app.get('/relatorio', (req, res) => {
       res.render("relatorio", { agendamentos, clienteBusca: cliente || "", servicos });
     });
   });
+});
+
+// Listar funcionários
+app.get("/funcionarios", (req, res) => {
+  if (!req.session.user) return res.redirect("/login");
+  db.all("SELECT * FROM funcionarios ORDER BY nome", [], (err, funcionarios) => {
+    if (err) {
+      return res.render("funcionarios", { funcionarios: [], error: "Erro ao buscar funcionários." });
+    }
+    res.render("funcionarios", { funcionarios, error: null });
+  });
+});
+
+// Cadastrar funcionário
+app.post("/funcionarios", (req, res) => {
+  if (!req.session.user) return res.redirect("/login");
+  const { nome, cargo } = req.body;
+  if (!nome) {
+    // Busca os funcionários para mostrar o erro
+    db.all("SELECT * FROM funcionarios ORDER BY nome", [], (err, funcionarios) => {
+      return res.render("funcionarios", { funcionarios, error: "Nome é obrigatório." });
+    });
+    return;
+  }
+  db.run(
+    "INSERT INTO funcionarios (nome, cargo, status) VALUES (?, ?, ?)",
+    [nome, cargo || '', 'Ativo'],
+    function (err) {
+      if (err) {
+        db.all("SELECT * FROM funcionarios ORDER BY nome", [], (err2, funcionarios) => {
+          return res.render("funcionarios", { funcionarios, error: "Erro ao cadastrar funcionário." });
+        });
+        return;
+      }
+      res.redirect("/funcionarios");
+    }
+  );
 });
 
 
