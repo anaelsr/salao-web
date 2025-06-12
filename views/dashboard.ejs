@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Painel de Agendamentos</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" />
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
   <style>
@@ -29,6 +29,12 @@
     .bg-warning-subtle {
       background-color: #fff9e6 !important;
     }
+    .update-feedback {
+      font-weight: bold;
+      color: #28a745; /* Verde */
+      margin-left: 5px;
+      display: none;
+    }
     @media (max-width: 575px) {
       .form-label, .form-control, .form-select, .btn, th, td { font-size: 16px !important;}
       h2, h4 { font-size: 22px !important;}
@@ -48,7 +54,6 @@
         <a href="/servicos" class="btn btn-outline-secondary me-2">
           <i class="bi bi-gear"></i> Serviços
         </a>
-        
         <a href="/funcionarios" class="btn btn-outline-info me-2">
           <i class="bi bi-person-badge"></i> Funcionários
         </a>
@@ -67,16 +72,16 @@
         <div class="row g-3">
           <div class="col-12 col-md-6 position-relative">
             <label for="cliente" class="form-label">Cliente</label>
-            <input type="text" class="form-control" id="cliente" name="cliente" autocomplete="off" required>
+            <input type="text" class="form-control" id="cliente" name="cliente" autocomplete="off" required />
             <div id="sugestoes-clientes" class="list-group position-absolute w-100" style="z-index:99"></div>
           </div>
           <div class="col-12 col-md-6">
             <label for="telefone" class="form-label">Telefone</label>
-            <input type="text" class="form-control" id="telefone" name="telefone" required>
+            <input type="text" class="form-control" id="telefone" name="telefone" required />
           </div>
           <div class="col-12 col-md-6">
             <label for="cpf" class="form-label">CPF</label>
-            <input type="text" class="form-control" id="cpf" name="cpf" maxlength="14" required>
+            <input type="text" class="form-control" id="cpf" name="cpf" maxlength="14" required />
           </div>
           <div class="col-12 col-md-6">
             <label for="servico" class="form-label">Serviço</label>
@@ -84,31 +89,21 @@
               <option value="">Selecione o serviço</option>
               <% servicos.forEach(s => { %>
                 <option value="<%= s.nome %>" data-valor="<%= s.preco %>"><%= s.nome %> - R$ <%= s.preco.toFixed(2) %></option>
-                <% }); %>
+              <% }); %>
             </select>
-            
           </div>
-
           <div class="col-12 col-md-6">
             <label for="valor" class="form-label">Valor a cobrar</label>
-            <input type="number" class="form-control" id="valor" name="valor" min="0" step="0.01" required>
+            <input type="number" class="form-control" id="valor" name="valor" min="0" step="0.01" required />
           </div>
-          
           <div class="col-12 col-md-6">
             <label for="valor_pago" class="form-label">Valor pago</label>
-            <input type="number" class="form-control" id="valor_pago" name="valor_pago" min="0" step="0.01">
+            <input type="number" class="form-control" id="valor_pago" name="valor_pago" min="0" step="0.01" />
           </div>
-          <div class="col-12 col-md-6 d-flex align-items-center" style="gap:10px">
-            <label class="form-label mb-0">Pago?</label>
-            <div class="form-check ms-2">
-              <input class="form-check-input" type="checkbox" value="sim" id="foi_pago" name="foi_pago">
-              <label class="form-check-label" for="foi_pago">Sim</label>
-            </div>
-          </div>
-
+          <!-- Removido checkbox Pago? do formulário -->
           <div class="col-12 col-md-6">
             <label for="datahora" class="form-label">Data e Hora</label>
-            <input type="datetime-local" class="form-control" id="datahora" name="datahora" required>
+            <input type="datetime-local" class="form-control" id="datahora" name="datahora" required />
           </div>
           <div class="col-12 col-md-6">
             <label for="funcionaria" class="form-label">Funcionário(a)</label>
@@ -118,11 +113,10 @@
                 <option value="<%= f.nome %>"><%= f.nome %> <%= f.cargo ? '- ' + f.cargo : '' %></option>
               <% }) %>
             </select>
-
-
           </div>
-          <div class="col-12 col-md-6 align-self-end">
-            <button type="submit" class="btn btn-success w-100 mt-1">Agendar</button>
+          <!-- Botão centralizado em sua própria linha -->
+          <div class="col-12 d-flex justify-content-center align-items-end">
+            <button type="submit" class="btn btn-success mt-1" style="min-width: 150px;">Agendar</button>
           </div>
         </div>
       </form>
@@ -147,6 +141,7 @@
               <th>Serviço</th>
               <th>Valor</th>
               <th>Valor pago</th>
+              <th>Valor restante</th>
               <th>Pago?</th>
               <th>Data/Hora</th>
               <th>Funcionária</th>
@@ -156,7 +151,8 @@
           </thead>
           <tbody>
             <% agendamentos.forEach(a => {
-                 const isVencido = a.status === 'pendente' && new Date(a.datahora) < new Date();
+              const isVencido = a.status === 'pendente' && new Date(a.datahora) < new Date();
+              const restante = (Number(a.valor) || 0) - (Number(a.valor_pago) || 0);
             %>
               <tr class="<%= isVencido ? 'table-warning' : '' %>">
                 <td><%= a.cliente %></td>
@@ -165,12 +161,10 @@
                 <td><%= a.servico %></td>
                 <td><%= a.valor ? 'R$ ' + Number(a.valor).toFixed(2) : '' %></td>
                 <td><%= a.valor_pago ? 'R$ ' + Number(a.valor_pago).toFixed(2) : '' %></td>
-                <td>
-                  <% if (a.foi_pago === true || a.foi_pago === "sim" || a.foi_pago === 1) { %>
-                    <span class="badge bg-success">Sim</span>
-                  <% } else { %>
-                    <span class="badge bg-secondary">Não</span>
-                  <% } %>
+                <td><%= 'R$ ' + restante.toFixed(2) %></td>
+                <td class="text-center">
+                  <input type="checkbox" class="checkbox-pago" data-id="<%= a.id %>" <%= (a.foi_pago === true || a.foi_pago === "sim" || a.foi_pago === 1) ? "checked" : "" %> />
+                  <span class="update-feedback">✓</span>
                 </td>
                 <td><%= a.datahora.replace("T", " ") %></td>
                 <td>
@@ -200,7 +194,6 @@
               </tr>
             <% }); %>
           </tbody>
-          
         </table>
       </div>
     </div>
@@ -211,25 +204,27 @@
       <% if (agendamentos.length === 0) { %>
         <div class="alert alert-light text-center">Nenhum agendamento cadastrado.</div>
       <% } else { %>
-        <% agendamentos.forEach(a => { 
-             const isVencido = a.status === 'pendente' && new Date(a.datahora) < new Date();
+        <% agendamentos.forEach(a => {
+          const isVencido = a.status === 'pendente' && new Date(a.datahora) < new Date();
+          const restante = (Number(a.valor) || 0) - (Number(a.valor_pago) || 0);
         %>
           <div class="card <%= isVencido ? 'border-warning bg-warning-subtle' : '' %>">
             <div class="card-body">
               <div class="d-flex justify-content-between align-items-center mb-2">
                 <span class="fw-bold" style="font-size: 1.1em;"><%= a.cliente %></span>
-                <span class="badge 
-                  <%= a.status === 'compareceu' ? 'bg-success' : 
-                      a.status === 'nao_compareceu' ? 'bg-danger' : 
+                <span class="badge
+                  <%= a.status === 'compareceu' ? 'bg-success' :
+                      a.status === 'nao_compareceu' ? 'bg-danger' :
                       isVencido ? 'bg-warning text-dark' : 'bg-warning text-dark' %>">
                   <%= isVencido ? "Aguardando (Vencido)" : (a.status.charAt(0).toUpperCase() + a.status.slice(1).replace('_',' ')) %>
                 </span>
               </div>
-              <div class="mb-1">
-                <i class="bi bi-telephone"></i> <b>Telefone:</b> <%= a.telefone %>
-              </div>
+              <div class="mb-1"><i class="bi bi-telephone"></i> <b>Telefone:</b> <%= a.telefone %></div>
               <div class="mb-1"><b>CPF:</b> <%= a.cpf || "" %></div>
               <div class="mb-1"><b>Serviço:</b> <%= a.servico %></div>
+              <div class="mb-1"><b>Valor:</b> <%= a.valor ? 'R$ ' + Number(a.valor).toFixed(2) : '' %></div>
+              <div class="mb-1"><b>Valor pago:</b> <%= a.valor_pago ? 'R$ ' + Number(a.valor_pago).toFixed(2) : '' %></div>
+              <div class="mb-1"><b>Valor restante:</b> <%= 'R$ ' + restante.toFixed(2) %></div>
               <div class="mb-1"><b>Data/Hora:</b> <%= a.datahora.replace("T", " ") %></div>
               <div class="mb-1"><b>Funcionária:</b>
                 <% if (a.funcionaria === "marcones") { %> Sogra (Marcones)
@@ -246,7 +241,7 @@
                   <option value="nao_compareceu" <%= a.status === "nao_compareceu" ? "selected" : "" %>>Não compareceu</option>
                 </select>
               </form>
-              <form method="post" action="/apagar/<%= a.id %>" 
+              <form method="post" action="/apagar/<%= a.id %>"
                 onsubmit="<%= a.status === 'compareceu' ? 'return false;' : 'return confirm(\'Tem certeza que deseja apagar este agendamento?\')' %>">
                 <button type="submit" class="btn btn-danger w-100" <%= a.status === 'compareceu' ? 'disabled style="opacity:0.6;cursor:not-allowed;"' : '' %>>
                   Apagar
@@ -261,25 +256,28 @@
 
   <!-- MÁSCARAS E VALIDAÇÃO -->
   <script>
-    $(document).ready(function() {
+    $(document).ready(function () {
       $('#telefone').mask('(00) 00000-0000');
-      $('#cpf').mask('000.000.000-00', {reverse: true});
+      $('#cpf').mask('000.000.000-00', { reverse: true });
     });
+
     function validarCPF(cpf) {
-      cpf = cpf.replace(/[^\d]+/g,'');
+      cpf = cpf.replace(/[^\d]+/g, '');
       if (cpf.length !== 11 || /^(\d)\1+$/.test(cpf)) return false;
-      let soma = 0, resto;
-      for (let i = 1; i <= 9; i++) soma += parseInt(cpf.substring(i-1, i)) * (11 - i);
+      let soma = 0,
+        resto;
+      for (let i = 1; i <= 9; i++) soma += parseInt(cpf.substring(i - 1, i)) * (11 - i);
       resto = (soma * 10) % 11;
       if (resto === 10 || resto === 11) resto = 0;
       if (resto !== parseInt(cpf.substring(9, 10))) return false;
       soma = 0;
-      for (let i = 1; i <= 10; i++) soma += parseInt(cpf.substring(i-1, i)) * (12 - i);
+      for (let i = 1; i <= 10; i++) soma += parseInt(cpf.substring(i - 1, i)) * (12 - i);
       resto = (soma * 10) % 11;
       if (resto === 10 || resto === 11) resto = 0;
       if (resto !== parseInt(cpf.substring(10, 11))) return false;
       return true;
     }
+
     function validarFormulario() {
       let cpf = document.getElementById('cpf').value;
       if (!validarCPF(cpf)) {
@@ -296,7 +294,7 @@
       }
       let dataAgendamento = new Date(dataSelecionada);
       let agora = new Date();
-      agora.setSeconds(0,0);
+      agora.setSeconds(0, 0);
       if (dataAgendamento < agora) {
         // Pergunta ao usuário se quer continuar mesmo assim
         let resposta = confirm('A data/hora selecionada já passou. Deseja agendar mesmo assim para registrar o atendimento?');
@@ -310,12 +308,14 @@
   </script>
 
   <script>
-    $(document).ready(function() {
+    $(document).ready(function () {
+      // Máscaras
       $('#telefone').mask('(00) 00000-0000');
-      $('#cpf').mask('000.000.000-00', {reverse: true});
-      // AUTOCOMPLETE DE CLIENTE
+      $('#cpf').mask('000.000.000-00', { reverse: true });
+
+      // Autocomplete Cliente
       let timer;
-      $('#cliente').on('input', function() {
+      $('#cliente').on('input', function () {
         clearTimeout(timer);
         let nome = $(this).val();
         if (nome.length < 2) {
@@ -323,52 +323,73 @@
           return;
         }
         timer = setTimeout(() => {
-          $.get('/clientes/autocomplete', { q: nome }, function(clientes) {
+          $.get('/clientes/autocomplete', { q: nome }, function (clientes) {
             if (!clientes.length) {
               $('#sugestoes-clientes').hide();
               return;
             }
-            let html = clientes.map(c => `
+            let html = clientes
+              .map(
+                (c) => `
               <a href="#" class="list-group-item list-group-item-action"
                 data-telefone="${c.telefone}"
                 data-cpf="${c.cpf}"
                 data-nome="${c.nome}">
                 ${c.nome} <small>(${c.telefone})</small>
               </a>
-            `).join('');
+            `
+              )
+              .join('');
             $('#sugestoes-clientes').html(html).show();
           });
         }, 200);
       });
-      // Ao clicar na sugestão
-      $('#sugestoes-clientes').on('click', '.list-group-item', function(e) {
+
+      // Clique sugestão cliente
+      $('#sugestoes-clientes').on('click', '.list-group-item', function (e) {
         e.preventDefault();
         $('#cliente').val($(this).data('nome'));
         $('#telefone').val($(this).data('telefone'));
         $('#cpf').val($(this).data('cpf'));
         $('#sugestoes-clientes').hide();
       });
-      // Esconde ao clicar fora
-      $(document).on('click', function(e) {
+
+      // Esconder sugestões ao clicar fora
+      $(document).on('click', function (e) {
         if (!$(e.target).closest('#sugestoes-clientes, #cliente').length) {
           $('#sugestoes-clientes').hide();
         }
       });
-    });
 
-    
-  </script>
+      // Atualizar valor automaticamente ao escolher serviço
+      $('#servico').on('change', function () {
+        var preco = $(this).find(':selected').data('valor');
+        if (preco !== undefined) {
+          $('#valor').val(Number(preco).toFixed(2));
+        }
+      });
 
-<script>
-  $(document).ready(function() {
-    $('#servico').on('change', function() {
-      var preco = $(this).find(':selected').data('valor');
-      if (preco !== undefined) {
-        $('#valor').val(Number(preco).toFixed(2));
-      }
+      // Controle de Pago na tabela via AJAX
+      $('.checkbox-pago').change(function () {
+        const checkbox = $(this);
+        const agendamentoId = checkbox.data('id');
+        const foiPago = checkbox.is(':checked');
+
+        $.ajax({
+          url: '/atualizar-pago/' + agendamentoId,
+          method: 'POST',
+          data: { foi_pago: foiPago },
+          success: function () {
+            const feedback = checkbox.siblings('.update-feedback');
+            feedback.fadeIn(200).delay(1500).fadeOut(200);
+          },
+          error: function () {
+            alert('Erro ao atualizar status de pagamento. Tente novamente.');
+            checkbox.prop('checked', !foiPago);
+          }
+        });
+      });
     });
-  });
   </script>
-  
 </body>
 </html>

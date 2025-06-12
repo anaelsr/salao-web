@@ -27,7 +27,10 @@ db.serialize(() => {
     servico TEXT,
     datahora TEXT,
     funcionaria TEXT,
-    status TEXT DEFAULT 'pendente'
+    status TEXT DEFAULT 'pendente',
+    valor REAL,
+    valor_pago REAL,
+    status_pagto TEXT DEFAULT 'nao_pago'
   )`);
 
   db.run(`CREATE TABLE IF NOT EXISTS clientes (
@@ -57,13 +60,7 @@ db.serialize(() => {
     cargo TEXT,
     status TEXT DEFAULT 'Ativo'
   )`);
-  
-  
-
-
 });
-
-
 
 // SESSÃO
 app.use(
@@ -147,7 +144,6 @@ app.get("/dashboard", (req, res) => {
   db.all(sql, params, (err, agendamentos) => {
     db.all("SELECT * FROM servicos ORDER BY nome", [], (err2, servicos) => {
       db.all("SELECT * FROM funcionarios WHERE status = 'Ativo' ORDER BY nome", [], (err3, funcionarios) => {
-        // Sempre manda funcionários para o EJS!
         res.render("dashboard", {
           user: req.session.user,
           agendamentos: err ? [] : agendamentos,
@@ -162,13 +158,11 @@ app.get("/dashboard", (req, res) => {
   });
 });
 
-
-
 // Cadastro de agendamento
 app.post("/agendar", (req, res) => {
   if (!req.session.user) return res.redirect("/login");
 
-  let { cliente, telefone, cpf, servico, datahora, funcionaria } = req.body;
+  let { cliente, telefone, cpf, servico, datahora, funcionaria, valor, valor_pago } = req.body;
 
   cpf = cpf.replace(/[^\d]/g, "");
 
@@ -176,7 +170,6 @@ app.post("/agendar", (req, res) => {
     return res.redirect("/dashboard?error=Preencha todos os campos");
   }
 
-  // Cadastra o cliente sem nascimento
   db.run(
     "INSERT OR IGNORE INTO clientes (nome, telefone, cpf) VALUES (?, ?, ?)",
     [cliente, telefone, cpf],
@@ -184,10 +177,9 @@ app.post("/agendar", (req, res) => {
       if (err) {
         console.log("Erro ao inserir cliente:", err);
       }
-      // Agora cadastra o agendamento sem nascimento
       db.run(
-        "INSERT INTO agendamentos (cliente, telefone, cpf, servico, datahora, funcionaria) VALUES (?, ?, ?, ?, ?, ?)",
-        [cliente, telefone, cpf, servico, datahora, funcionaria],
+        "INSERT INTO agendamentos (cliente, telefone, cpf, servico, datahora, funcionaria, valor, valor_pago) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+        [cliente, telefone, cpf, servico, datahora, funcionaria, valor || null, valor_pago || null],
         function (err) {
           if (err) {
             console.log("Erro ao agendar:", err);
@@ -440,6 +432,43 @@ app.post('/atualizar-status/:id', (req, res) => {
         return res.redirect("/dashboard?error=Erro ao atualizar status");
       }
       res.redirect("/dashboard");
+    }
+  );
+});
+
+app.post('/atualizar-status-pagto/:id', (req, res) => {
+  const id = req.params.id;
+  const novoStatus = req.body.status_pagto;
+
+  db.run("UPDATE agendamentos SET status_pagto = ? WHERE id = ?", [novoStatus, id], (err) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).send("Erro ao atualizar status de pagamento");
+    }
+    res.redirect('/dashboard'); // redireciona para atualizar a tabela
+  });
+});
+
+app.post('/atualizar-pago/:id', (req, res) => {
+  if (!req.session.user) return res.status(401).send('Não autorizado');
+
+  const id = req.params.id;
+  // Como o checkbox envia "true" ou "false" como string, convertemos para número 1 ou 0
+  const foiPago = req.body.foi_pago === 'true' ? 1 : 0;
+
+  // Atualize o campo correto na tabela agendamentos (status_pagto ou outro)
+  // Aqui suponho que você tenha uma coluna 'foi_pago' do tipo INTEGER (0 ou 1)
+  // Caso use status_pagto, adapte o valor para 'sim' ou 'nao_pago' conforme lógica
+
+  db.run(
+    "UPDATE agendamentos SET foi_pago = ? WHERE id = ?",
+    [foiPago, id],
+    function (err) {
+      if (err) {
+        console.error("Erro ao atualizar status de pagamento:", err);
+        return res.status(500).send("Erro ao atualizar status de pagamento");
+      }
+      res.sendStatus(200);
     }
   );
 });
