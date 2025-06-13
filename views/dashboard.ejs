@@ -9,231 +9,169 @@
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
   <style>
-    body { background: #f8f9fa; font-size: 18px; }
-    .card { border-radius: 18px; box-shadow: 0 2px 12px rgba(0,0,0,0.04);}
-    .form-control, .form-select, .btn { min-height: 48px; font-size: 1rem; border-radius: 12px;}
-    .btn { padding: 0.5rem 1.2rem; font-weight: 500;}
-    @media (max-width: 991px) {
-      .desktop-table { display: none !important; }
-      .mobile-cards { display: block !important; }
-      .container { padding: 0 2px !important;}
-    }
-    @media (min-width: 992px) {
-      .desktop-table { display: block !important; }
-      .mobile-cards { display: none !important; }
-    }
-    .mobile-cards .card { margin-bottom: 16px; border: 1.5px solid #e5e5e5; }
-    .mobile-cards .card-body { padding: 18px 14px; }
-    .mobile-cards .badge { font-size: 1rem; margin-bottom: 4px; border-radius: 8px;}
-    .mobile-cards .btn { font-size: 1rem; border-radius: 10px; }
-    .bg-warning-subtle {
-      background-color: #fff9e6 !important;
-    }
-    .update-feedback {
-      font-weight: bold;
-      color: #28a745; /* Verde */
-      margin-left: 5px;
-      display: none;
-    }
-    @media (max-width: 575px) {
-      .form-label, .form-control, .form-select, .btn, th, td { font-size: 16px !important;}
-      h2, h4 { font-size: 22px !important;}
-      .card { border-radius: 12px;}
-      .container { padding: 0 1px !important;}
+    body{background:#f8f9fa;font-size:18px}
+    .card{border-radius:18px;box-shadow:0 2px 12px rgba(0,0,0,.04)}
+    .form-control,.form-select,.btn{min-height:48px;font-size:1rem;border-radius:12px}
+    .btn{padding:.5rem 1.2rem;font-weight:500}
+    @media(max-width:991px){.desktop-table{display:none!important}.mobile-cards{display:block!important}.container{padding:0 2px!important}}
+    @media(min-width:992px){.desktop-table{display:block!important}.mobile-cards{display:none!important}}
+    .mobile-cards .card{margin-bottom:16px;border:1.5px solid #e5e5e5}
+    .mobile-cards .card-body{padding:18px 14px}
+    .mobile-cards .badge{font-size:1rem;margin-bottom:4px;border-radius:8px}
+    .mobile-cards .btn{font-size:1rem;border-radius:10px}
+    .bg-warning-subtle{background-color:#fff9e6!important}
+    .update-feedback{font-weight:bold;color:#28a745;margin-left:5px;display:none}
+    @media(max-width:575px){
+      .form-label,.form-control,.form-select,.btn,th,td{font-size:16px!important}
+      h2,h4{font-size:22px!important}
+      .card{border-radius:12px}
+      .container{padding:0 1px!important}
     }
   </style>
 </head>
+
 <body>
-  <div class="container mt-4 mb-4 px-2">
-    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap">
-      <h2 class="mb-0">Painel de Agendamentos</h2>
-      <div class="mt-2 mt-md-0 d-flex align-items-center gap-2 flex-wrap">
-        <a href="/clientes" class="btn btn-outline-primary me-2">
-          <i class="bi bi-people"></i> Consultar Clientes
-        </a>
-        <a href="/servicos" class="btn btn-outline-secondary me-2">
-          <i class="bi bi-gear"></i> Serviços
-        </a>
-        <a href="/funcionarios" class="btn btn-outline-info me-2">
-          <i class="bi bi-person-badge"></i> Funcionários
-        </a>
-        <a href="/relatorio" class="btn btn-outline-dark me-2">
-          <i class="bi bi-bar-chart"></i> Relatório
-        </a>
-        <span class="me-3">Olá, <b><%= user %></b></span>
-        <a href="/logout" class="btn btn-outline-danger btn-sm">Sair</a>
-      </div>
+<div class="container mt-4 mb-4 px-2">
+  <!-- Barra de navegação/links -->
+  <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap">
+    <h2 class="mb-0">Painel de Agendamentos</h2>
+    <div class="mt-2 mt-md-0 d-flex align-items-center gap-2 flex-wrap">
+      <a href="/clientes" class="btn btn-outline-primary me-2">
+        <i class="bi bi-people"></i> Consultar Clientes
+      </a>
+      <a href="/servicos" class="btn btn-outline-secondary me-2">
+        <i class="bi bi-gear"></i> Serviços
+      </a>
+      <a href="/funcionarios" class="btn btn-outline-info me-2">
+        <i class="bi bi-person-badge"></i> Funcionários
+      </a>
+      <a href="/relatorio" class="btn btn-outline-dark me-2">
+        <i class="bi bi-bar-chart"></i> Relatório
+      </a>
+      <span class="me-3">Olá, <b><%= user %></b></span>
+      <a href="/logout" class="btn btn-outline-danger btn-sm">Sair</a>
     </div>
+  </div>
 
-    <!-- Formulário -->
-    <div class="card p-3 mb-4">
-      <h4 class="mb-3">Novo Agendamento</h4>
-      <form method="post" action="/agendar" onsubmit="return validarFormulario();">
-        <div class="row g-3">
-          <div class="col-12 col-md-6 position-relative">
-            <label for="cliente" class="form-label">Cliente</label>
-            <input type="text" class="form-control" id="cliente" name="cliente" autocomplete="off" required />
-            <div id="sugestoes-clientes" class="list-group position-absolute w-100" style="z-index:99"></div>
-          </div>
-          <div class="col-12 col-md-6">
-            <label for="telefone" class="form-label">Telefone</label>
-            <input type="text" class="form-control" id="telefone" name="telefone" required />
-          </div>
-          <div class="col-12 col-md-6">
-            <label for="cpf" class="form-label">CPF</label>
-            <input type="text" class="form-control" id="cpf" name="cpf" maxlength="14" required />
-          </div>
-          <div class="col-12 col-md-6">
-            <label for="servico" class="form-label">Serviço</label>
-            <select class="form-select" id="servico" name="servico" required>
-              <option value="">Selecione o serviço</option>
-              <% servicos.forEach(s => { %>
-                <option value="<%= s.nome %>" data-valor="<%= s.preco %>"><%= s.nome %> - R$ <%= s.preco.toFixed(2) %></option>
-              <% }); %>
-            </select>
-          </div>
-          <div class="col-12 col-md-6">
-            <label for="valor" class="form-label">Valor a cobrar</label>
-            <input type="number" class="form-control" id="valor" name="valor" min="0" step="0.01" required />
-          </div>
-          <div class="col-12 col-md-6">
-            <label for="valor_pago" class="form-label">Valor pago</label>
-            <input type="number" class="form-control" id="valor_pago" name="valor_pago" min="0" step="0.01" />
-          </div>
-          <!-- Removido checkbox Pago? do formulário -->
-          <div class="col-12 col-md-6">
-            <label for="datahora" class="form-label">Data e Hora</label>
-            <input type="datetime-local" class="form-control" id="datahora" name="datahora" required />
-          </div>
-          <div class="col-12 col-md-6">
-            <label for="funcionaria" class="form-label">Funcionário(a)</label>
-            <select class="form-select" id="funcionaria" name="funcionaria" required>
-              <option value="">Selecione</option>
-              <% funcionarios.forEach(f => { %>
-                <option value="<%= f.nome %>"><%= f.nome %> <%= f.cargo ? '- ' + f.cargo : '' %></option>
-              <% }) %>
-            </select>
-          </div>
-          <!-- Botão centralizado em sua própria linha -->
-          <div class="col-12 d-flex justify-content-center align-items-end">
-            <button type="submit" class="btn btn-success mt-1" style="min-width: 150px;">Agendar</button>
-          </div>
+  <!-- Formulário de novo agendamento -->
+  <div class="card p-3 mb-4">
+    <h4 class="mb-3">Novo Agendamento</h4>
+    <form method="post" action="/agendar" onsubmit="return validarFormulario();">
+      <div class="row g-3">
+        <div class="col-12 col-md-6 position-relative">
+          <label for="cliente" class="form-label">Cliente</label>
+          <input type="text" class="form-control" id="cliente" name="cliente" autocomplete="off" required />
+          <div id="sugestoes-clientes" class="list-group position-absolute w-100" style="z-index:99"></div>
         </div>
-      </form>
-    </div>
 
-    <!-- Tabela Desktop -->
-    <div class="mb-3 d-flex flex-wrap gap-2">
-      <a href="/dashboard?filtro=dia" class="btn btn-outline-primary <% if (filtro === 'dia') { %>active<% } %>">Hoje</a>
-      <a href="/dashboard?filtro=semana" class="btn btn-outline-primary <% if (filtro === 'semana') { %>active<% } %>">Semana</a>
-      <a href="/dashboard?filtro=mes" class="btn btn-outline-primary <% if (filtro === 'mes') { %>active<% } %>">Mês</a>
-      <a href="/dashboard?filtro=todos" class="btn btn-outline-primary <% if (filtro === 'todos' || !filtro) { %>active<% } %>">Todos</a>
-    </div>
-    <div class="card p-3 desktop-table mb-4">
-      <h4 class="mb-3">Todos os Agendamentos</h4>
-      <div class="table-responsive">
-        <table class="table table-bordered table-hover align-middle mb-0">
-          <thead class="table-light">
-            <tr>
-              <th>Cliente</th>
-              <th>Telefone</th>
-              <th>CPF</th>
-              <th>Serviço</th>
-              <th>Valor</th>
-              <th>Valor pago</th>
-              <th>Valor restante</th>
-              <th>Pago?</th>
-              <th>Data/Hora</th>
-              <th>Funcionária</th>
-              <th>Status</th>
-              <th>Ação</th>
-            </tr>
-          </thead>
-          <tbody>
-            <% agendamentos.forEach(a => {
-              const isVencido = a.status === 'pendente' && new Date(a.datahora) < new Date();
-              const restante = (Number(a.valor) || 0) - (Number(a.valor_pago) || 0);
-            %>
-              <tr class="<%= isVencido ? 'table-warning' : '' %>">
-                <td><%= a.cliente %></td>
-                <td><%= a.telefone %></td>
-                <td><%= a.cpf || "" %></td>
-                <td><%= a.servico %></td>
-                <td><%= a.valor ? 'R$ ' + Number(a.valor).toFixed(2) : '' %></td>
-                <td><%= a.valor_pago ? 'R$ ' + Number(a.valor_pago).toFixed(2) : '' %></td>
-                <td><%= 'R$ ' + restante.toFixed(2) %></td>
-                <td class="text-center">
-                  <input type="checkbox" class="checkbox-pago" data-id="<%= a.id %>" <%= (a.foi_pago === true || a.foi_pago === "sim" || a.foi_pago === 1) ? "checked" : "" %> />
-                  <span class="update-feedback">✓</span>
-                </td>
-                <td><%= a.datahora.replace("T", " ") %></td>
-                <td>
-                  <% if (a.funcionaria === "marcones") { %> Sogra (Marcones)
-                  <% } else if (a.funcionaria === "analaura") { %> Ana Laura
-                  <% } else if (a.funcionaria === "luiza") { %> Luiza
-                  <% } else { %> <%= a.funcionaria %> <% } %>
-                </td>
-                <td>
-                  <form method="post" action="/atualizar-status/<%= a.id %>" style="display:inline;">
-                    <select name="status" class="form-select form-select-sm d-inline" style="width:auto;display:inline-block" onchange="this.form.submit()">
-                      <option value="pendente" <%= a.status === "pendente" ? "selected" : "" %>>
-                        <%= isVencido ? "Aguardando (Vencido)" : "Pendente" %>
-                      </option>
-                      <option value="compareceu" <%= a.status === "compareceu" ? "selected" : "" %>>Compareceu</option>
-                      <option value="nao_compareceu" <%= a.status === "nao_compareceu" ? "selected" : "" %>>Não compareceu</option>
-                    </select>
-                  </form>
-                </td>
-                <td>
-                  <form method="post" action="/apagar/<%= a.id %>" onsubmit="<%= a.status === 'compareceu' ? 'return false;' : 'return confirm(\'Tem certeza que deseja apagar este agendamento?\')' %>">
-                    <button type="submit" class="btn btn-sm btn-danger" <%= a.status === 'compareceu' ? 'disabled style="opacity:0.6;cursor:not-allowed;"' : '' %>>
-                      Apagar
-                    </button>
-                  </form>
-                </td>
-              </tr>
+        <div class="col-12 col-md-6">
+          <label for="telefone" class="form-label">Telefone</label>
+          <input type="text" class="form-control" id="telefone" name="telefone" required />
+        </div>
+
+        <div class="col-12 col-md-6">
+          <label for="cpf" class="form-label">CPF</label>
+          <input type="text" class="form-control" id="cpf" name="cpf" maxlength="14" required />
+        </div>
+
+        <div class="col-12 col-md-6">
+          <label for="servico" class="form-label">Serviço</label>
+          <select class="form-select" id="servico" name="servico" required>
+            <option value="">Selecione o serviço</option>
+            <% servicos.forEach(s => { %>
+              <option value="<%= s.nome %>" data-valor="<%= s.preco %>"><%= s.nome %> - R$ <%= s.preco.toFixed(2) %></option>
             <% }); %>
-          </tbody>
-        </table>
-      </div>
-    </div>
+          </select>
+        </div>
 
-    <!-- Cards Mobile -->
-    <div class="mobile-cards mb-4" style="display:none;">
-      <h4 class="mb-3">Todos os Agendamentos</h4>
-      <% if (agendamentos.length === 0) { %>
-        <div class="alert alert-light text-center">Nenhum agendamento cadastrado.</div>
-      <% } else { %>
-        <% agendamentos.forEach(a => {
-          const isVencido = a.status === 'pendente' && new Date(a.datahora) < new Date();
-          const restante = (Number(a.valor) || 0) - (Number(a.valor_pago) || 0);
-        %>
-          <div class="card <%= isVencido ? 'border-warning bg-warning-subtle' : '' %>">
-            <div class="card-body">
-              <div class="d-flex justify-content-between align-items-center mb-2">
-                <span class="fw-bold" style="font-size: 1.1em;"><%= a.cliente %></span>
-                <span class="badge
-                  <%= a.status === 'compareceu' ? 'bg-success' :
-                      a.status === 'nao_compareceu' ? 'bg-danger' :
-                      isVencido ? 'bg-warning text-dark' : 'bg-warning text-dark' %>">
-                  <%= isVencido ? "Aguardando (Vencido)" : (a.status.charAt(0).toUpperCase() + a.status.slice(1).replace('_',' ')) %>
-                </span>
-              </div>
-              <div class="mb-1"><i class="bi bi-telephone"></i> <b>Telefone:</b> <%= a.telefone %></div>
-              <div class="mb-1"><b>CPF:</b> <%= a.cpf || "" %></div>
-              <div class="mb-1"><b>Serviço:</b> <%= a.servico %></div>
-              <div class="mb-1"><b>Valor:</b> <%= a.valor ? 'R$ ' + Number(a.valor).toFixed(2) : '' %></div>
-              <div class="mb-1"><b>Valor pago:</b> <%= a.valor_pago ? 'R$ ' + Number(a.valor_pago).toFixed(2) : '' %></div>
-              <div class="mb-1"><b>Valor restante:</b> <%= 'R$ ' + restante.toFixed(2) %></div>
-              <div class="mb-1"><b>Data/Hora:</b> <%= a.datahora.replace("T", " ") %></div>
-              <div class="mb-1"><b>Funcionária:</b>
-                <% if (a.funcionaria === "marcones") { %> Sogra (Marcones)
-                <% } else if (a.funcionaria === "analaura") { %> Ana Laura
-                <% } else if (a.funcionaria === "luiza") { %> Luiza
-                <% } else { %> <%= a.funcionaria %> <% } %>
-              </div>
-              <form method="post" action="/atualizar-status/<%= a.id %>" class="mb-2">
-                <select name="status" class="form-select form-select-sm" onchange="this.form.submit()">
+        <div class="col-12 col-md-6">
+          <label for="valor" class="form-label">Valor a cobrar</label>
+          <input type="number" class="form-control" id="valor" name="valor" min="0" step="0.01" required />
+        </div>
+
+        <div class="col-12 col-md-6">
+          <label for="valor_pago" class="form-label">Valor pago</label>
+          <input type="number" class="form-control" id="valor_pago" name="valor_pago" min="0" step="0.01" />
+        </div>
+
+        <div class="col-12 col-md-6">
+          <label for="datahora" class="form-label">Data e Hora</label>
+          <input type="datetime-local" class="form-control" id="datahora" name="datahora" required />
+        </div>
+
+        <div class="col-12 col-md-6">
+          <label for="funcionaria" class="form-label">Funcionário(a)</label>
+          <select class="form-select" id="funcionaria" name="funcionaria" required>
+            <option value="">Selecione</option>
+            <% funcionarios.forEach(f => { %>
+              <option value="<%= f.nome %>"><%= f.nome %> <%= f.cargo ? '- ' + f.cargo : '' %></option>
+            <% }) %>
+          </select>
+        </div>
+
+        <div class="col-12 d-flex justify-content-center align-items-end">
+          <button type="submit" class="btn btn-success mt-1" style="min-width:150px;">Agendar</button>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <!-- Filtros -->
+  <div class="mb-3 d-flex flex-wrap gap-2">
+    <a href="/dashboard?filtro=dia" class="btn btn-outline-primary <% if (filtro === 'dia') { %>active<% } %>">Hoje</a>
+    <a href="/dashboard?filtro=semana" class="btn btn-outline-primary <% if (filtro === 'semana') { %>active<% } %>">Semana</a>
+    <a href="/dashboard?filtro=mes" class="btn btn-outline-primary <% if (filtro === 'mes') { %>active<% } %>">Mês</a>
+    <a href="/dashboard?filtro=todos" class="btn btn-outline-primary <% if (filtro === 'todos' || !filtro) { %>active<% } %>">Todos</a>
+  </div>
+
+  <!-- Tabela Desktop -->
+  <div class="card p-3 desktop-table mb-4">
+    <h4 class="mb-3">Todos os Agendamentos</h4>
+    <div class="table-responsive">
+      <table class="table table-bordered table-hover align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>Cliente</th>
+            <th>Telefone</th>
+            <th>CPF</th>
+            <th>Serviço</th>
+            <th>Valor</th>
+            <th>Valor pago</th>
+            <th>Valor restante</th>
+            <th>Pago?</th>
+            <th>Data/Hora</th>
+            <th>Funcionária</th>
+            <th>Status</th>
+            <th>Ação</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% agendamentos.forEach(a => {
+             const isVencido = a.status === 'pendente' && new Date(a.datahora) < new Date();
+             const restante = (Number(a.valor) || 0) - (Number(a.valor_pago) || 0);
+          %>
+          <tr class="<%= isVencido ? 'table-warning' : '' %>">
+            <td><%= a.cliente %></td>
+            <td><%= a.telefone %></td>
+            <td><%= a.cpf || "" %></td>
+            <td><%= a.servico %></td>
+            <td><%= a.valor ? 'R$ ' + Number(a.valor).toFixed(2) : '' %></td>
+            <td><%= a.valor_pago ? 'R$ ' + Number(a.valor_pago).toFixed(2) : '' %></td>
+            <td><%= 'R$ ' + restante.toFixed(2) %></td>
+            <td class="text-center">
+              <input type="checkbox" class="checkbox-pago" data-id="<%= a.id %>" <%= (a.foi_pago === true || a.foi_pago === "sim" || a.foi_pago === 1) ? "checked" : "" %> />
+              <span class="update-feedback">✓</span>
+            </td>
+            <td><%= a.datahora.replace("T", " ") %></td>
+            <td>
+              <% if (a.funcionaria === "marcones") { %> Sogra (Marcones)
+              <% } else if (a.funcionaria === "analaura") { %> Ana Laura
+              <% } else if (a.funcionaria === "luiza") { %> Luiza
+              <% } else { %> <%= a.funcionaria %> <% } %>
+            </td>
+            <td>
+              <form method="post" action="/atualizar-status/<%= a.id %>" style="display:inline;">
+                <select name="status" class="form-select form-select-sm d-inline" style="width:auto;display:inline-block" onchange="this.form.submit()">
                   <option value="pendente" <%= a.status === "pendente" ? "selected" : "" %>>
                     <%= isVencido ? "Aguardando (Vencido)" : "Pendente" %>
                   </option>
@@ -241,155 +179,246 @@
                   <option value="nao_compareceu" <%= a.status === "nao_compareceu" ? "selected" : "" %>>Não compareceu</option>
                 </select>
               </form>
+            </td>
+            <td class="d-flex flex-column gap-1">
+              <!-- Botão Modal Pagamento -->
+              <button type="button" class="btn btn-sm btn-success"
+                onclick="abrirModalPagamento(<%= a.id %>, '<%= a.cliente %>', <%= restante %>)">
+                + Pagamento
+              </button>
+
+              <!-- Botão Apagar -->
               <form method="post" action="/apagar/<%= a.id %>"
-                onsubmit="<%= a.status === 'compareceu' ? 'return false;' : 'return confirm(\'Tem certeza que deseja apagar este agendamento?\')' %>">
-                <button type="submit" class="btn btn-danger w-100" <%= a.status === 'compareceu' ? 'disabled style="opacity:0.6;cursor:not-allowed;"' : '' %>>
+                    onsubmit="<%= a.status === 'compareceu' ? 'return false;' : 'return confirm(\'Tem certeza que deseja apagar este agendamento?\')' %>">
+                <button type="submit" class="btn btn-sm btn-danger"
+                        <%= a.status === 'compareceu' ? 'disabled style="opacity:0.6;cursor:not-allowed;"' : '' %>>
                   Apagar
                 </button>
               </form>
-            </div>
-          </div>
-        <% }); %>
-      <% } %>
+            </td>
+          </tr>
+          <% }); %>
+        </tbody>
+      </table>
     </div>
   </div>
 
-  <!-- MÁSCARAS E VALIDAÇÃO -->
-  <script>
-    $(document).ready(function () {
-      $('#telefone').mask('(00) 00000-0000');
-      $('#cpf').mask('000.000.000-00', { reverse: true });
-    });
+  <!-- Cards Mobile -->
+  <div class="mobile-cards mb-4" style="display:none;">
+    <h4 class="mb-3">Todos os Agendamentos</h4>
+    <% if (agendamentos.length === 0) { %>
+      <div class="alert alert-light text-center">Nenhum agendamento cadastrado.</div>
+    <% } else { %>
+      <% agendamentos.forEach(a => {
+         const isVencido = a.status === 'pendente' && new Date(a.datahora) < new Date();
+         const restante = (Number(a.valor) || 0) - (Number(a.valor_pago) || 0);
+      %>
+      <div class="card <%= isVencido ? 'border-warning bg-warning-subtle' : '' %>">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <span class="fw-bold" style="font-size:1.1em;"><%= a.cliente %></span>
+            <span class="badge
+              <%= a.status === 'compareceu' ? 'bg-success' :
+                  a.status === 'nao_compareceu' ? 'bg-danger' :
+                  'bg-warning text-dark' %>">
+              <%= isVencido ? "Aguardando (Vencido)" : (a.status.charAt(0).toUpperCase()+a.status.slice(1).replace('_',' ')) %>
+            </span>
+          </div>
+          <div class="mb-1"><i class="bi bi-telephone"></i> <b>Telefone:</b> <%= a.telefone %></div>
+          <div class="mb-1"><b>CPF:</b> <%= a.cpf || "" %></div>
+          <div class="mb-1"><b>Serviço:</b> <%= a.servico %></div>
+          <div class="mb-1"><b>Valor:</b> <%= a.valor ? 'R$ ' + Number(a.valor).toFixed(2) : '' %></div>
+          <div class="mb-1"><b>Valor pago:</b> <%= a.valor_pago ? 'R$ ' + Number(a.valor_pago).toFixed(2) : '' %></div>
+          <div class="mb-1"><b>Valor restante:</b> <%= 'R$ ' + restante.toFixed(2) %></div>
+          <div class="mb-1"><b>Data/Hora:</b> <%= a.datahora.replace("T", " ") %></div>
+          <div class="mb-1"><b>Funcionária:</b>
+            <% if (a.funcionaria === "marcones") { %> Sogra (Marcones)
+            <% } else if (a.funcionaria === "analaura") { %> Ana Laura
+            <% } else if (a.funcionaria === "luiza") { %> Luiza
+            <% } else { %> <%= a.funcionaria %> <% } %>
+          </div>
 
-    function validarCPF(cpf) {
-      cpf = cpf.replace(/[^\d]+/g, '');
-      if (cpf.length !== 11 || /^(\d)\1+$/.test(cpf)) return false;
-      let soma = 0,
-        resto;
-      for (let i = 1; i <= 9; i++) soma += parseInt(cpf.substring(i - 1, i)) * (11 - i);
-      resto = (soma * 10) % 11;
-      if (resto === 10 || resto === 11) resto = 0;
-      if (resto !== parseInt(cpf.substring(9, 10))) return false;
-      soma = 0;
-      for (let i = 1; i <= 10; i++) soma += parseInt(cpf.substring(i - 1, i)) * (12 - i);
-      resto = (soma * 10) % 11;
-      if (resto === 10 || resto === 11) resto = 0;
-      if (resto !== parseInt(cpf.substring(10, 11))) return false;
-      return true;
-    }
+          <div class="d-grid gap-2 mb-2">
+            <button type="button" class="btn btn-success"
+              onclick="abrirModalPagamento(<%= a.id %>, '<%= a.cliente %>', <%= restante %>)">
+              + Pagamento
+            </button>
+          </div>
 
-    function validarFormulario() {
-      let cpf = document.getElementById('cpf').value;
-      if (!validarCPF(cpf)) {
-        alert('CPF inválido!');
-        document.getElementById('cpf').focus();
-        return false;
-      }
-      // Validação da data/hora
-      let dataSelecionada = document.getElementById('datahora').value;
-      if (!dataSelecionada) {
-        alert('Selecione uma data e hora!');
-        document.getElementById('datahora').focus();
-        return false;
-      }
-      let dataAgendamento = new Date(dataSelecionada);
-      let agora = new Date();
-      agora.setSeconds(0, 0);
-      if (dataAgendamento < agora) {
-        // Pergunta ao usuário se quer continuar mesmo assim
-        let resposta = confirm('A data/hora selecionada já passou. Deseja agendar mesmo assim para registrar o atendimento?');
-        if (!resposta) {
-          document.getElementById('datahora').focus();
-          return false;
-        }
-      }
-      return true;
-    }
-  </script>
+          <form method="post" action="/atualizar-status/<%= a.id %>" class="mb-2">
+            <select name="status" class="form-select form-select-sm" onchange="this.form.submit()">
+              <option value="pendente" <%= a.status === "pendente" ? "selected" : "" %>>
+                <%= isVencido ? "Aguardando (Vencido)" : "Pendente" %>
+              </option>
+              <option value="compareceu" <%= a.status === "compareceu" ? "selected" : "" %>>Compareceu</option>
+              <option value="nao_compareceu" <%= a.status === "nao_compareceu" ? "selected" : "" %>>Não compareceu</option>
+            </select>
+          </form>
 
-  <script>
-    $(document).ready(function () {
-      // Máscaras
-      $('#telefone').mask('(00) 00000-0000');
-      $('#cpf').mask('000.000.000-00', { reverse: true });
+          <form method="post" action="/apagar/<%= a.id %>"
+                onsubmit="<%= a.status === 'compareceu' ? 'return false;' : 'return confirm(\'Tem certeza que deseja apagar este agendamento?\')' %>">
+            <button type="submit" class="btn btn-danger w-100"
+                    <%= a.status === 'compareceu' ? 'disabled style="opacity:0.6;cursor:not-allowed;"' : '' %>>
+              Apagar
+            </button>
+          </form>
+        </div>
+      </div>
+      <% }); %>
+    <% } %>
+  </div>
+</div> <!-- /.container -->
 
-      // Autocomplete Cliente
-      let timer;
-      $('#cliente').on('input', function () {
-        clearTimeout(timer);
-        let nome = $(this).val();
-        if (nome.length < 2) {
-          $('#sugestoes-clientes').hide();
-          return;
-        }
-        timer = setTimeout(() => {
-          $.get('/clientes/autocomplete', { q: nome }, function (clientes) {
-            if (!clientes.length) {
-              $('#sugestoes-clientes').hide();
-              return;
-            }
-            let html = clientes
-              .map(
-                (c) => `
-              <a href="#" class="list-group-item list-group-item-action"
-                data-telefone="${c.telefone}"
-                data-cpf="${c.cpf}"
-                data-nome="${c.nome}">
-                ${c.nome} <small>(${c.telefone})</small>
-              </a>
-            `
-              )
-              .join('');
-            $('#sugestoes-clientes').html(html).show();
-          });
-        }, 200);
-      });
+<!-- ================= MODAL PAGAMENTO ================= -->
+<div class="modal fade" id="modalPagamento" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <form id="formPagamento" method="post">
+        <div class="modal-header">
+          <h5 class="modal-title">Adicionar pagamento</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-2">
+            <label class="form-label">Cliente</label>
+            <input type="text" class="form-control" id="pagamentoCliente" disabled>
+          </div>
+          <div class="mb-2">
+            <label class="form-label">Valor restante</label>
+            <input type="text" class="form-control" id="pagamentoRestante" disabled>
+          </div>
+          <div class="mb-2">
+            <label class="form-label">Valor pago agora</label>
+            <input type="number" class="form-control" name="valorPago" id="valorPago" min="0" step="0.01" required>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-success">Confirmar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
 
-      // Clique sugestão cliente
-      $('#sugestoes-clientes').on('click', '.list-group-item', function (e) {
-        e.preventDefault();
-        $('#cliente').val($(this).data('nome'));
-        $('#telefone').val($(this).data('telefone'));
-        $('#cpf').val($(this).data('cpf'));
-        $('#sugestoes-clientes').hide();
-      });
+<!-- =================== SCRIPTS =================== -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
-      // Esconder sugestões ao clicar fora
-      $(document).on('click', function (e) {
-        if (!$(e.target).closest('#sugestoes-clientes, #cliente').length) {
-          $('#sugestoes-clientes').hide();
-        }
-      });
+<script>
+  $(document).ready(function(){
+    // máscaras
+    $('#telefone').mask('(00) 00000-0000');
+    $('#cpf').mask('000.000.000-00',{reverse:true});
 
-      // Atualizar valor automaticamente ao escolher serviço
-      $('#servico').on('change', function () {
-        var preco = $(this).find(':selected').data('valor');
-        if (preco !== undefined) {
-          $('#valor').val(Number(preco).toFixed(2));
-        }
-      });
-
-      // Controle de Pago na tabela via AJAX
-      $('.checkbox-pago').change(function () {
-        const checkbox = $(this);
-        const agendamentoId = checkbox.data('id');
-        const foiPago = checkbox.is(':checked');
-
-        $.ajax({
-          url: '/atualizar-pago/' + agendamentoId,
-          method: 'POST',
-          data: { foi_pago: foiPago },
-          success: function () {
-            const feedback = checkbox.siblings('.update-feedback');
-            feedback.fadeIn(200).delay(1500).fadeOut(200);
-          },
-          error: function () {
-            alert('Erro ao atualizar status de pagamento. Tente novamente.');
-            checkbox.prop('checked', !foiPago);
-          }
+    // autocomplete cliente
+    let timer;
+    $('#cliente').on('input',function(){
+      clearTimeout(timer);
+      const nome=$(this).val();
+      if(nome.length<2){$('#sugestoes-clientes').hide();return;}
+      timer=setTimeout(()=>{
+        $.get('/clientes/autocomplete',{q:nome},function(clientes){
+          if(!clientes.length){$('#sugestoes-clientes').hide();return;}
+          const html=clientes.map(c=>`
+            <a href="#" class="list-group-item list-group-item-action"
+              data-telefone="${c.telefone}"
+              data-cpf="${c.cpf}"
+              data-nome="${c.nome}">
+              ${c.nome} <small>(${c.telefone})</small>
+            </a>`).join('');
+          $('#sugestoes-clientes').html(html).show();
         });
+      },200);
+    });
+
+    // clique em sugestão
+    $('#sugestoes-clientes').on('click','.list-group-item',function(e){
+      e.preventDefault();
+      $('#cliente').val($(this).data('nome'));
+      $('#telefone').val($(this).data('telefone'));
+      $('#cpf').val($(this).data('cpf'));
+      $('#sugestoes-clientes').hide();
+    });
+
+    // esconder sugestões ao clicar fora
+    $(document).on('click',function(e){
+      if(!$(e.target).closest('#sugestoes-clientes,#cliente').length){
+        $('#sugestoes-clientes').hide();
+      }
+    });
+
+    // valor automático pelo serviço
+    $('#servico').on('change',function(){
+      const preco=$(this).find(':selected').data('valor');
+      if(preco!==undefined) $('#valor').val(Number(preco).toFixed(2));
+    });
+
+    // checkbox Pago
+    $('.checkbox-pago').change(function(){
+      const checkbox=$(this);
+      const id=checkbox.data('id');
+      const foiPago=checkbox.is(':checked');
+      $.ajax({
+        url:'/atualizar-pago/'+id,
+        method:'POST',
+        data:{foi_pago:foiPago},
+        success:function(){
+          const fb=checkbox.siblings('.update-feedback');
+          fb.fadeIn(200).delay(1500).fadeOut(200);
+        },
+        error:function(){
+          alert('Erro ao atualizar status de pagamento.');
+          checkbox.prop('checked',!foiPago);
+        }
       });
     });
-  </script>
+  });
+
+  // === Funções de validação ===
+  function validarCPF(cpf){
+    cpf=cpf.replace(/[^\d]+/g,'');
+    if(cpf.length!==11||/^(\d)\1+$/.test(cpf))return false;
+    let soma=0,resto;
+    for(let i=1;i<=9;i++) soma+=parseInt(cpf.substring(i-1,i))*(11-i);
+    resto=(soma*10)%11;
+    if(resto===10||resto===11)resto=0;
+    if(resto!==parseInt(cpf.substring(9,10)))return false;
+    soma=0;
+    for(let i=1;i<=10;i++) soma+=parseInt(cpf.substring(i-1,i))*(12-i);
+    resto=(soma*10)%11;
+    if(resto===10||resto===11)resto=0;
+    return resto===parseInt(cpf.substring(10,11));
+  }
+
+  function validarFormulario(){
+    const cpf=document.getElementById('cpf').value;
+    if(!validarCPF(cpf)){alert('CPF inválido!');return false;}
+    const data=document.getElementById('datahora').value;
+    if(!data){alert('Selecione uma data e hora!');return false;}
+    const ag=new Date(data),agora=new Date();agora.setSeconds(0,0);
+    if(ag<agora){
+      if(!confirm('Data/hora já passou. Agendar mesmo assim?'))return false;
+    }
+    return true;
+  }
+
+  // === Modal de pagamento ===
+  let restanteAtual=0;
+  function abrirModalPagamento(id,cliente,restante){
+    restanteAtual=parseFloat(restante);
+    $('#pagamentoCliente').val(cliente);
+    $('#pagamentoRestante').val(`R$ ${restanteAtual.toFixed(2)}`);
+    $('#valorPago').val('');
+    $('#formPagamento').attr('action',`/pagamentos/${id}`);
+    const modal=new bootstrap.Modal(document.getElementById('modalPagamento'));
+    modal.show();
+  }
+  $('#formPagamento').on('submit',function(){
+    const valor=parseFloat($('#valorPago').val()||0);
+    if(valor<=0){alert('Informe um valor válido!');return false;}
+    if(valor>restanteAtual){alert('Valor maior que o restante.');return false;}
+    return true;
+  });
+</script>
 </body>
 </html>

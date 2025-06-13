@@ -129,7 +129,13 @@ app.get("/dashboard", (req, res) => {
   if (!req.session.user) return res.redirect("/login");
 
   const filtro = req.query.filtro || "todos";
-  let sql = "SELECT * FROM agendamentos";
+  let sql = `
+  SELECT a.*,
+         IFNULL(SUM(p.valor_pago), 0) AS valor_pago,
+         a.valor - IFNULL(SUM(p.valor_pago), 0) AS valor_restante
+  FROM agendamentos a
+  LEFT JOIN pagamentos p ON a.id = p.agendamento_id
+`;
   let params = [];
 
   if (filtro === "dia") {
@@ -139,7 +145,7 @@ app.get("/dashboard", (req, res) => {
   } else if (filtro === "mes") {
     sql += " WHERE strftime('%Y-%m', datahora) = strftime('%Y-%m', 'now', 'localtime')";
   }
-  sql += " ORDER BY datahora";
+   sql += " GROUP BY a.id ORDER BY datahora";
 
   db.all(sql, params, (err, agendamentos) => {
     db.all("SELECT * FROM servicos ORDER BY nome", [], (err2, servicos) => {
@@ -472,8 +478,85 @@ app.post('/atualizar-pago/:id', (req, res) => {
     }
   );
 });
+db.run(`CREATE TABLE IF NOT EXISTS pagamentos (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  agendamento_id INTEGER NOT NULL,
+  valor_pago REAL NOT NULL,
+  data_pagamento TEXT DEFAULT CURRENT_TIMESTAMP,
+  forma_pagamento TEXT,
+  observacao TEXT,
+  FOREIGN KEY (agendamento_id) REFERENCES agendamentos(id) ON DELETE CASCADE
+)`);
+
+// Registrar novo pagamento
+app.post("/pagamento", (req, res) => {
+  if (!req.session.user) return res.redirect("/login");
+
+  const { agendamento_id, valor_pago, forma_pagamento, observacao } = req.body;
+
+  if (!valor_pago || isNaN(valor_pago)) {
+    return res.redirect("/dashboard?error=Valor inválido");
+  }
+
+  db.run(
+    `INSERT INTO pagamentos (agendamento_id, valor_pago, forma_pagamento, observacao)
+     VALUES (?, ?, ?, ?)`,
+    [agendamento_id, valor_pago, forma_pagamento || null, observacao || null],
+    function (err) {
+      if (err) {
+        console.error("Erro ao registrar pagamento:", err);
+        return res.redirect("/dashboard?error=Erro ao salvar pagamento");
+      }
+
+      res.redirect("/dashboard?success=Pagamento registrado com sucesso!");
+    }
+  );
+});
 
 
+/* ------------------------------------------------------------
+   PAGAMENTOS – usado pelo botão “+ Pagamento”
+   ------------------------------------------------------------ */
+   app.post("/pagamentos/:id", (req, res) => {
+    if (!req.session.user) return res.redirect("/login");
+  
+    const agendamentoId = req.params.id;
+    const valorPago     = parseFloat(req.body.valorPago);
+  
+    if (!valorPago || isNaN(valorPago) || valorPago <= 0)
+      return res.redirect("/dashboard?error=Valor inválido");
+  
+    // 1) grava o pagamento na tabela pagamentos
+    db.run(
+      "INSERT INTO pagamentos (agendamento_id, valor_pago) VALUES (?, ?)",
+      [agendamentoId, valorPago],
+      (err) => {
+        if (err) return res.redirect("/dashboard?error=Erro ao salvar pagamento");
+  
+        // 2) calcula a soma para saber se quitou
+        db.get(`
+          SELECT a.valor,
+                 IFNULL(SUM(p.valor_pago), 0) AS totalPago
+            FROM agendamentos a
+       LEFT JOIN pagamentos p ON p.agendamento_id = a.id
+           WHERE a.id = ?
+        GROUP BY a.id`,
+          [agendamentoId],
+          (_e, row) => {
+            const novoStatus =
+              row && row.totalPago >= row.valor ? "pago" : "nao_pago";
+  
+            db.run(
+              "UPDATE agendamentos SET status_pagto = ? WHERE id = ?",
+              [novoStatus, agendamentoId],
+              () => res.redirect("/dashboard?success=Pagamento registrado!")
+            );
+          }
+        );
+      }
+    );
+  });
+  
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Rodando na porta ${PORT}`);
