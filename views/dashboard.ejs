@@ -138,7 +138,7 @@
             <th>Valor</th>
             <th>Valor pago</th>
             <th>Valor restante</th>
-            <th>Pago?</th>
+            <th>Status Pagamento</th>
             <th>Data/Hora</th>
             <th>Funcionária</th>
             <th>Status</th>
@@ -159,9 +159,30 @@
             <td><%= a.valor_pago ? 'R$ ' + Number(a.valor_pago).toFixed(2) : '' %></td>
             <td><%= 'R$ ' + restante.toFixed(2) %></td>
             <td class="text-center">
-              <input type="checkbox" class="checkbox-pago" data-id="<%= a.id %>" <%= (a.foi_pago === true || a.foi_pago === "sim" || a.foi_pago === 1) ? "checked" : "" %> />
-              <span class="update-feedback">✓</span>
+              <%
+                const total = Number(a.valor) || 0;
+                const pago = Number(a.valor_pago) || 0;
+                const restantePagto = total - pago;
+                let statusPagto = '';
+                let badgePagto = '';
+            
+                if (restantePagto <= 0) {
+                  statusPagto = 'Pago';
+                  badgePagto = 'bg-success';
+                } else if (pago > 0 && pago < total) {
+                  statusPagto = 'Parcial';
+                  badgePagto = 'bg-warning text-dark';
+                } else if (isVencido) {
+                  statusPagto = 'Vencido';
+                  badgePagto = 'bg-danger';
+                } else {
+                  statusPagto = 'Em aberto';
+                  badgePagto = 'bg-secondary';
+                }
+              %>
+              <span class="badge <%= badgePagto %>"><%= statusPagto %></span>
             </td>
+            
             <td><%= a.datahora.replace("T", " ") %></td>
             <td>
               <% if (a.funcionaria === "marcones") { %> Sogra (Marcones)
@@ -230,6 +251,31 @@
           <div class="mb-1"><b>Valor:</b> <%= a.valor ? 'R$ ' + Number(a.valor).toFixed(2) : '' %></div>
           <div class="mb-1"><b>Valor pago:</b> <%= a.valor_pago ? 'R$ ' + Number(a.valor_pago).toFixed(2) : '' %></div>
           <div class="mb-1"><b>Valor restante:</b> <%= 'R$ ' + restante.toFixed(2) %></div>
+          <div class="mb-1"><b>Status Pagamento:</b>
+            <%
+              const totalMobile = Number(a.valor) || 0;
+              const pagoMobile = Number(a.valor_pago) || 0;
+              const restantePagtoMobile = totalMobile - pagoMobile;
+              let statusPagtoMobile = '';
+              let badgePagtoMobile = '';
+          
+              if (restantePagtoMobile <= 0) {
+                statusPagtoMobile = 'Pago';
+                badgePagtoMobile = 'bg-success';
+              } else if (pagoMobile > 0 && pagoMobile < totalMobile) {
+                statusPagtoMobile = 'Parcial';
+                badgePagtoMobile = 'bg-warning text-dark';
+              } else if (isVencido) {
+                statusPagtoMobile = 'Vencido';
+                badgePagtoMobile = 'bg-danger';
+              } else {
+                statusPagtoMobile = 'Em aberto';
+                badgePagtoMobile = 'bg-secondary';
+              }
+            %>
+            <span class="badge <%= badgePagtoMobile %>"><%= statusPagtoMobile %></span>
+          </div>
+          
           <div class="mb-1"><b>Data/Hora:</b> <%= a.datahora.replace("T", " ") %></div>
           <div class="mb-1"><b>Funcionária:</b>
             <% if (a.funcionaria === "marcones") { %> Sogra (Marcones)

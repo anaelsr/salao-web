@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Histórico de Pagamentos - <%= cliente ? cliente.nome : "" %></title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+</head>
+<body class="bg-light">
+  <div class="container mt-4">
+    <a href="/clientes" class="btn btn-secondary mb-3">
+      <i class="bi bi-arrow-left"></i> Voltar à lista de clientes
+    </a>
+    <% if (error) { %>
+      <div class="alert alert-danger"><%= error %></div>
+    <% } else { %>
+      <h2 class="mb-3"><i class="bi bi-person"></i> <%= cliente.nome %></h2>
+      <div class="mb-2"><i class="bi bi-phone"></i> <b>Telefone:</b> <%= cliente.telefone %></div>
+      <div class="mb-3"><i class="bi bi-credit-card"></i> <b>CPF:</b> <%= cliente.cpf %></div>
+      <h4 class="mb-3"><i class="bi bi-cash-coin"></i> Histórico de Pagamentos</h4>
+
+      <% if (pagamentos.length === 0) { %>
+        <div class="alert alert-info">Nenhum pagamento registrado para este cliente.</div>
+      <% } else { %>
+        <div class="table-responsive">
+          <table class="table table-bordered align-middle">
+            <thead class="table-light">
+              <tr>
+                <th>Serviço</th>
+                <th>Data/Hora Agendamento</th>
+                <th>Valor Pago</th>
+                <th>Data do Pagamento</th>
+                <th>Forma</th>
+                <th>Observação</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% pagamentos.forEach(p => { %>
+                <tr>
+                  <td><%= p.servico %></td>
+                  <td><%= p.datahora ? new Date(p.datahora).toLocaleString('pt-BR') : "" %></td>
+                  <td>R$ <%= p.valor_pago.toFixed(2) %></td>
+                  <td><%= p.data_pagamento ? new Date(p.data_pagamento).toLocaleString('pt-BR') : "" %></td>
+                  <td><%= p.forma_pagamento || "-" %></td>
+                  <td><%= p.observacao || "" %></td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      <% } %>
+    <% } %>
+  </div>
+</body>
+</html>
