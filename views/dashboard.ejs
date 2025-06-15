@@ -27,6 +27,195 @@
       .card{border-radius:12px}
       .container{padding:0 1px!important}
     }
+
+/* Modernização da tabela de agendamentos */
+.table {
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 2px 18px rgba(0,0,0,0.07);
+}
+.table th, .table td {
+  vertical-align: middle !important;
+  padding: 0.85rem 1.2rem !important;
+  font-size: 17px;
+  border-color: #eaeaea !important;
+  background: #fff;
+}
+.table thead th {
+  background: #f7f9fa !important;
+  color: #3d3d3d;
+  font-weight: 700;
+  border-bottom: 2.5px solid #e4e7ed;
+  text-align: center;
+}
+.table tbody tr:nth-child(even) {
+  background: #f8fafb;
+}
+.table tbody tr:hover {
+  background: #f0f6ff !important;
+  transition: background 0.2s;
+}
+.table th, .table td {
+  text-align: center;
+}
+.table th:first-child, .table td:first-child {
+  text-align: left;
+}
+
+.badge {
+  font-size: 1em !important;
+  padding: 7px 20px !important;
+  border-radius: 14px !important;
+  font-weight: 600 !important;
+  box-shadow: 0 1px 8px rgba(0,0,0,0.04);
+  letter-spacing: .5px;
+  border: none;
+  margin: 0 auto;
+  display: inline-block;
+}
+.badge.bg-success    { background: #39d79b !important; color: #fff; }
+.badge.bg-warning    { background: #fff7c3 !important; color: #6c5a00 !important; }
+.badge.bg-secondary  { background: #e7eaf3 !important; color: #535c68; }
+.badge.bg-danger     { background: #ffadad !important; color: #b30909 !important; }
+
+.btn-success {
+  background: #21c087 !important;
+  border: none;
+  color: #fff !important;
+  transition: background .15s;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+.btn-success:hover {
+  background: #199669 !important;
+}
+.btn-danger {
+  background: #fc6969 !important;
+  border: none;
+  color: #fff !important;
+  transition: background .15s;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+.btn-danger:hover {
+  background: #e74c3c !important;
+}
+
+.card.p-3.desktop-table {
+  border-radius: 20px;
+  border: none;
+  box-shadow: 0 1px 10px rgba(0,0,0,.04);
+  padding: 24px !important;
+}
+
+/* Responsividade extra para tabela */
+@media (max-width: 1200px) {
+  .table th, .table td { font-size: 15px; padding: 0.7rem 0.5rem !important; }
+}
+@media (max-width: 900px) {
+  .table-responsive { font-size: 14px; }
+}
+
+/* Realce agressivo para agendamento vencido */
+tr.table-warning,
+.card.table-warning,
+tr.table-danger,
+.card.table-danger,
+.bg-warning-vencido {
+  background: linear-gradient(90deg, #fff4e5 70%, #ffd6a0 100%) !important;
+  animation: alertaVencido 1s linear infinite alternate;
+}
+@keyframes alertaVencido {
+  from { box-shadow: 0 0 0px #ffa60044; }
+  to   { box-shadow: 0 0 12px 2px #ffa60088; }
+}
+.bg-warning-vencido:hover, 
+tr.bg-warning-vencido:hover {
+  background: linear-gradient(90deg, #ffe1d3 60%, #ffad7a 100%) !important;
+  animation: alertaVencidoHover 0.6s linear infinite alternate;
+  cursor: pointer;
+}
+@keyframes alertaVencidoHover {
+  from { box-shadow: 0 0 4px #ff6d00aa; }
+  to   { box-shadow: 0 0 24px 6px #ff3200cc; }
+}
+
+
+/* Badge vencido super destacado */
+.badge-vencido {
+  background: #ff4e24 !important;
+  color: #fff !important;
+  font-weight: bold;
+  border-radius: 12px !important;
+  box-shadow: 0 0 7px #ff4e247a;
+  letter-spacing: .5px;
+}
+
+.badge-vencido {
+  background: #ff4e24 !important;
+  color: #fff !important;
+  font-weight: bold;
+  border-radius: 12px !important;
+  box-shadow: 0 0 7px #ff4e247a;
+  letter-spacing: .5px;
+  animation: pulseVencido 1.1s infinite alternate;
+}
+
+.table-vencido {
+  animation: piscaLinha 1s linear infinite alternate;
+  background: #ffe1d3 !important;
+}
+@keyframes piscaLinha {
+  from { background: #ffe1d3; }
+  to   { background: #ffad7a; }
+}
+.table-vencido > td, .table-vencido > th {
+  background: transparent !important;
+}
+
+.table-vencido:hover {
+  background: linear-gradient(90deg, #ffe1d3 60%, #ffad7a 100%) !important;
+  animation: alertaVencidoHover 0.6s linear infinite alternate;
+  cursor: pointer;
+}
+
+
+@keyframes pulseVencido {
+  from {
+    box-shadow: 0 0 7px #ff4e247a, 0 0 0 #fff;
+    transform: scale(1);
+  }
+  to {
+    box-shadow: 0 0 22px 4px #ff4e24aa, 0 0 0 #fff;
+    transform: scale(1.06);
+  }
+}
+
+.table-vencido > td, .table-vencido > th {
+  background: transparent !important;
+}
+
+.card-vencido {
+  animation: piscaCard 1s linear infinite alternate;
+  background: #ffe1d3 !important;
+  border-color: #ff4e24 !important;
+}
+@keyframes piscaCard {
+  from { background: #ffe1d3; }
+  to   { background: #ffad7a; }
+}
+
+/* ATENÇÃO: Adicione APÓS TODO O RESTANTE! */
+.mobile-cards .card.card-vencido {
+  animation: piscaCard 1s linear infinite alternate !important;
+  background: #ffe1d3 !important;
+  border-color: #ff4e24 !important;
+}
+@keyframes piscaCard {
+  from { background: #ffe1d3 !important; }
+  to   { background: #ffad7a !important; }
+}
+
   </style>
 </head>
 
@@ -150,8 +339,15 @@
              const isVencido = a.status === 'pendente' && new Date(a.datahora) < new Date();
              const restante = (Number(a.valor) || 0) - (Number(a.valor_pago) || 0);
           %>
-          <tr class="<%= isVencido ? 'table-warning' : '' %>">
-            <td><%= a.cliente %></td>
+          <tr class="<%= (isVencido && restante > 0) ? 'table-vencido' : '' %>">
+
+            <td>
+              <% if (isVencido && a.status === "pendente") { %>
+                <i class="bi bi-exclamation-triangle-fill text-danger me-1" title="Agendamento vencido"></i>
+              <% } %>
+              <%= a.cliente %>
+            </td>
+            
             <td><%= a.telefone %></td>
             <td><%= a.cpf || "" %></td>
             <td><%= a.servico %></td>
@@ -165,23 +361,28 @@
                 const restantePagto = total - pago;
                 let statusPagto = '';
                 let badgePagto = '';
-            
+                // AQUI: vencido só destaca se pendente, passou data, e não foi pago totalmente
                 if (restantePagto <= 0) {
                   statusPagto = 'Pago';
                   badgePagto = 'bg-success';
                 } else if (pago > 0 && pago < total) {
                   statusPagto = 'Parcial';
                   badgePagto = 'bg-warning text-dark';
-                } else if (isVencido) {
-                  statusPagto = 'Vencido';
-                  badgePagto = 'bg-danger';
                 } else {
                   statusPagto = 'Em aberto';
                   badgePagto = 'bg-secondary';
                 }
               %>
-              <span class="badge <%= badgePagto %>"><%= statusPagto %></span>
+              <% if (isVencido && restantePagto > 0) { %>
+                <span class="badge badge-vencido">
+                  <i class="bi bi-exclamation-triangle-fill" style="margin-right:6px;font-size:1.1em;vertical-align:middle"></i>
+                  Em aberto (Vencido)
+                </span>
+              <% } else { %>
+                <span class="badge <%= badgePagto %>"><%= statusPagto %></span>
+              <% } %>
             </td>
+                      
             
             <td><%= a.datahora.replace("T", " ") %></td>
             <td>
@@ -224,95 +425,98 @@
     </div>
   </div>
 
-  <!-- Cards Mobile -->
-  <div class="mobile-cards mb-4" style="display:none;">
-    <h4 class="mb-3">Todos os Agendamentos</h4>
-    <% if (agendamentos.length === 0) { %>
-      <div class="alert alert-light text-center">Nenhum agendamento cadastrado.</div>
-    <% } else { %>
-      <% agendamentos.forEach(a => {
-         const isVencido = a.status === 'pendente' && new Date(a.datahora) < new Date();
-         const restante = (Number(a.valor) || 0) - (Number(a.valor_pago) || 0);
-      %>
-      <div class="card <%= isVencido ? 'border-warning bg-warning-subtle' : '' %>">
-        <div class="card-body">
-          <div class="d-flex justify-content-between align-items-center mb-2">
-            <span class="fw-bold" style="font-size:1.1em;"><%= a.cliente %></span>
-            <span class="badge
-              <%= a.status === 'compareceu' ? 'bg-success' :
-                  a.status === 'nao_compareceu' ? 'bg-danger' :
-                  'bg-warning text-dark' %>">
-              <%= isVencido ? "Aguardando (Vencido)" : (a.status.charAt(0).toUpperCase()+a.status.slice(1).replace('_',' ')) %>
-            </span>
-          </div>
-          <div class="mb-1"><i class="bi bi-telephone"></i> <b>Telefone:</b> <%= a.telefone %></div>
-          <div class="mb-1"><b>CPF:</b> <%= a.cpf || "" %></div>
-          <div class="mb-1"><b>Serviço:</b> <%= a.servico %></div>
-          <div class="mb-1"><b>Valor:</b> <%= a.valor ? 'R$ ' + Number(a.valor).toFixed(2) : '' %></div>
-          <div class="mb-1"><b>Valor pago:</b> <%= a.valor_pago ? 'R$ ' + Number(a.valor_pago).toFixed(2) : '' %></div>
-          <div class="mb-1"><b>Valor restante:</b> <%= 'R$ ' + restante.toFixed(2) %></div>
-          <div class="mb-1"><b>Status Pagamento:</b>
-            <%
-              const totalMobile = Number(a.valor) || 0;
-              const pagoMobile = Number(a.valor_pago) || 0;
-              const restantePagtoMobile = totalMobile - pagoMobile;
-              let statusPagtoMobile = '';
-              let badgePagtoMobile = '';
-          
-              if (restantePagtoMobile <= 0) {
-                statusPagtoMobile = 'Pago';
-                badgePagtoMobile = 'bg-success';
-              } else if (pagoMobile > 0 && pagoMobile < totalMobile) {
-                statusPagtoMobile = 'Parcial';
-                badgePagtoMobile = 'bg-warning text-dark';
-              } else if (isVencido) {
-                statusPagtoMobile = 'Vencido';
-                badgePagtoMobile = 'bg-danger';
-              } else {
-                statusPagtoMobile = 'Em aberto';
-                badgePagtoMobile = 'bg-secondary';
-              }
-            %>
-            <span class="badge <%= badgePagtoMobile %>"><%= statusPagtoMobile %></span>
-          </div>
-          
-          <div class="mb-1"><b>Data/Hora:</b> <%= a.datahora.replace("T", " ") %></div>
-          <div class="mb-1"><b>Funcionária:</b>
-            <% if (a.funcionaria === "marcones") { %> Sogra (Marcones)
-            <% } else if (a.funcionaria === "analaura") { %> Ana Laura
-            <% } else if (a.funcionaria === "luiza") { %> Luiza
-            <% } else { %> <%= a.funcionaria %> <% } %>
-          </div>
-
-          <div class="d-grid gap-2 mb-2">
-            <button type="button" class="btn btn-success"
-              onclick="abrirModalPagamento(<%= a.id %>, '<%= a.cliente %>', <%= restante %>)">
-              + Pagamento
-            </button>
-          </div>
-
-          <form method="post" action="/atualizar-status/<%= a.id %>" class="mb-2">
-            <select name="status" class="form-select form-select-sm" onchange="this.form.submit()">
-              <option value="pendente" <%= a.status === "pendente" ? "selected" : "" %>>
-                <%= isVencido ? "Aguardando (Vencido)" : "Pendente" %>
-              </option>
-              <option value="compareceu" <%= a.status === "compareceu" ? "selected" : "" %>>Compareceu</option>
-              <option value="nao_compareceu" <%= a.status === "nao_compareceu" ? "selected" : "" %>>Não compareceu</option>
-            </select>
-          </form>
-
-          <form method="post" action="/apagar/<%= a.id %>"
-                onsubmit="<%= a.status === 'compareceu' ? 'return false;' : 'return confirm(\'Tem certeza que deseja apagar este agendamento?\')' %>">
-            <button type="submit" class="btn btn-danger w-100"
-                    <%= a.status === 'compareceu' ? 'disabled style="opacity:0.6;cursor:not-allowed;"' : '' %>>
-              Apagar
-            </button>
-          </form>
+<!-- Cards Mobile -->
+<div class="mobile-cards mb-4">
+  <h4 class="mb-3">Todos os Agendamentos</h4>
+  <% if (agendamentos.length === 0) { %>
+    <div class="alert alert-light text-center">Nenhum agendamento cadastrado.</div>
+  <% } else { %>
+    <% agendamentos.forEach(a => {
+      const isVencido = a.status === 'pendente' && new Date(a.datahora) < new Date();
+      const restante = (Number(a.valor) || 0) - (Number(a.valor_pago) || 0);
+    %>
+    <div class="card <%= isVencido ? 'card-vencido' : '' %>">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <span class="fw-bold" style="font-size:1.1em;">
+            <% if (isVencido && a.status === "pendente") { %>
+              <i class="bi bi-exclamation-triangle-fill text-danger me-1"
+                 title="Agendamento vencido"
+                 onclick="alert('Este horário está vencido: o cliente não compareceu ou não foi pago no prazo.');"
+                 style="cursor:pointer"></i>
+            <% } %>
+            <%= a.cliente %>
+          </span>
+          <span class="badge
+            <%= a.status === 'compareceu' ? 'bg-success' :
+                a.status === 'nao_compareceu' ? 'bg-danger' :
+                'bg-warning text-dark' %>">
+            <%= isVencido ? "Aguardando (Vencido)" : (a.status.charAt(0).toUpperCase()+a.status.slice(1).replace('_',' ')) %>
+          </span>
         </div>
+        <div class="mb-1"><i class="bi bi-telephone"></i> <b>Telefone:</b> <%= a.telefone %></div>
+        <div class="mb-1"><b>CPF:</b> <%= a.cpf || "" %></div>
+        <div class="mb-1"><b>Serviço:</b> <%= a.servico %></div>
+        <div class="mb-1"><b>Valor:</b> <%= a.valor ? 'R$ ' + Number(a.valor).toFixed(2) : '' %></div>
+        <div class="mb-1"><b>Valor pago:</b> <%= a.valor_pago ? 'R$ ' + Number(a.valor_pago).toFixed(2) : '' %></div>
+        <div class="mb-1"><b>Valor restante:</b> <%= 'R$ ' + restante.toFixed(2) %></div>
+        <div class="mb-1"><b>Status Pagamento:</b>
+          <%
+            const totalMobile = Number(a.valor) || 0;
+            const pagoMobile = Number(a.valor_pago) || 0;
+            const restantePagtoMobile = totalMobile - pagoMobile;
+            let statusPagtoMobile = '';
+            let badgePagtoMobile = '';
+            if (restantePagtoMobile <= 0) {
+              statusPagtoMobile = 'Pago';
+              badgePagtoMobile = 'bg-success';
+            } else if (pagoMobile > 0 && pagoMobile < totalMobile) {
+              statusPagtoMobile = 'Parcial';
+              badgePagtoMobile = 'bg-warning text-dark';
+            } else if (isVencido) {
+              statusPagtoMobile = 'Vencido';
+              badgePagtoMobile = 'bg-danger';
+            } else {
+              statusPagtoMobile = 'Em aberto';
+              badgePagtoMobile = 'bg-secondary';
+            }
+          %>
+          <span class="badge <%= badgePagtoMobile %>"><%= statusPagtoMobile %></span>
+        </div>
+        <div class="mb-1"><b>Data/Hora:</b> <%= a.datahora.replace("T", " ") %></div>
+        <div class="mb-1"><b>Funcionária:</b>
+          <% if (a.funcionaria === "marcones") { %> Sogra (Marcones)
+          <% } else if (a.funcionaria === "analaura") { %> Ana Laura
+          <% } else if (a.funcionaria === "luiza") { %> Luiza
+          <% } else { %> <%= a.funcionaria %> <% } %>
+        </div>
+        <div class="d-grid gap-2 mb-2">
+          <button type="button" class="btn btn-success"
+            onclick="abrirModalPagamento(<%= a.id %>, '<%= a.cliente %>', <%= restante %>)">
+            + Pagamento
+          </button>
+        </div>
+        <form method="post" action="/atualizar-status/<%= a.id %>" class="mb-2">
+          <select name="status" class="form-select form-select-sm" onchange="this.form.submit()">
+            <option value="pendente" <%= a.status === "pendente" ? "selected" : "" %>>
+              <%= isVencido ? "Aguardando (Vencido)" : "Pendente" %>
+            </option>
+            <option value="compareceu" <%= a.status === "compareceu" ? "selected" : "" %>>Compareceu</option>
+            <option value="nao_compareceu" <%= a.status === "nao_compareceu" ? "selected" : "" %>>Não compareceu</option>
+          </select>
+        </form>
+        <form method="post" action="/apagar/<%= a.id %>"
+              onsubmit="<%= a.status === 'compareceu' ? 'return false;' : 'return confirm(\'Tem certeza que deseja apagar este agendamento?\')' %>">
+          <button type="submit" class="btn btn-danger w-100"
+                  <%= a.status === 'compareceu' ? 'disabled style="opacity:0.6;cursor:not-allowed;"' : '' %>>
+            Apagar
+          </button>
+        </form>
       </div>
-      <% }); %>
-    <% } %>
-  </div>
+    </div>
+    <% }); %>
+  <% } %>
+</div>
 </div> <!-- /.container -->
 
 <!-- ================= MODAL PAGAMENTO ================= -->
