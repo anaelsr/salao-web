@@ -216,8 +216,83 @@ tr.bg-warning-vencido:hover {
   to   { background: #ffad7a !important; }
 }
 
+
+.table-responsive {
+  overflow-x: scroll !important; /* Sempre exibir barra horizontal */
+  overflow-y: auto !important;
+  min-width: 100%;
+  min-height: 300px;
+  scrollbar-width: auto; /* Firefox */
+  scrollbar-color: #888 #eee;
+  position: relative;
+}
+
+.table {
+  min-width: 1200px; /* Ajuste para garantir overflow horizontal */
+}
+
+/* Scrollbar personalizada para Chrome, Edge e Safari */
+.table-responsive::-webkit-scrollbar {
+  height: 12px; /* Barra horizontal */
+  background-color: #eee;
+}
+
+.table-responsive::-webkit-scrollbar-thumb {
+  background-color: #888;
+  border-radius: 8px;
+}
+
+.table-responsive::-webkit-scrollbar-track {
+  background-color: #eee;
+}
+
+/* --- barra fake acima da tabela ---------------------------------- */
+.table-scroll-wrapper {
+  position: relative;
+  /* nada mais aqui – só agrupar */
+}
+
+.scrollbar-clone {
+  display:block;      /* garantia extra */
+  width:100%;         /* <- adicione isto!  */
+  overflow-x: auto;          /* cria a barra horizontal */
+  overflow-y: hidden;
+  height: 14px;              /* altura da barra */
+}
+
+.scrollbar-clone::-webkit-scrollbar {
+  height: 14px;              /* Chrome/Safari */
+}
+.scrollbar-clone::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 8px;
+}
+.scrollbar-clone::-webkit-scrollbar-track {
+  background: #eee;
+}
+
+/* faz o “miolo” invisível; só a barra importa */
+.scrollbar-clone .spacer {
+  height: 1px;               /* 1 px é suficiente */
+}
+
+/* Esconde a barra horizontal nativa */
+.table-responsive{
+  scrollbar-width: none;          /* Firefox */
+}
+.table-responsive::-webkit-scrollbar{
+  height:0 !important;            /* Chrome / Safari / Edge */
+}
+
+
+
+
   </style>
+
+
 </head>
+
+
 
 <body>
 <div class="container mt-4 mb-4 px-2">
@@ -313,117 +388,115 @@ tr.bg-warning-vencido:hover {
     <a href="/dashboard?filtro=todos" class="btn btn-outline-primary <% if (filtro === 'todos' || !filtro) { %>active<% } %>">Todos</a>
   </div>
 
-  <!-- Tabela Desktop -->
-  <div class="card p-3 desktop-table mb-4">
-    <h4 class="mb-3">Todos os Agendamentos</h4>
+<!-- Tabela Desktop -->
+<div class="card p-3 desktop-table mb-4">
+  <h4 class="mb-3">Todos os Agendamentos</h4>
+
+  <!-- wrapper: barra-fake TOP + tabela + barra-fake BOTTOM -->
+  <div class="table-scroll-wrapper">
+
+    <!-- barra-fake TOP -->
+    <div class="scrollbar-clone">
+      <div class="spacer"></div>
+    </div>
+
+    <!-- Tabela real -->
     <div class="table-responsive">
       <table class="table table-bordered table-hover align-middle mb-0">
         <thead class="table-light">
           <tr>
-            <th>Cliente</th>
-            <th>Telefone</th>
-            <th>CPF</th>
-            <th>Serviço</th>
-            <th>Valor</th>
-            <th>Valor pago</th>
-            <th>Valor restante</th>
-            <th>Status Pagamento</th>
-            <th>Data/Hora</th>
-            <th>Funcionária</th>
-            <th>Status</th>
-            <th>Ação</th>
+            <th>Cliente</th><th>Telefone</th><th>CPF</th><th>Serviço</th>
+            <th>Valor</th><th>Valor pago</th><th>Valor restante</th>
+            <th>Status Pagamento</th><th>Data/Hora</th><th>Funcionária</th>
+            <th>Status</th><th>Ação</th>
           </tr>
         </thead>
         <tbody>
-          <% agendamentos.forEach(a => {
+        <% agendamentos.forEach(a => {
              const isVencido = a.status === 'pendente' && new Date(a.datahora) < new Date();
-             const restante = (Number(a.valor) || 0) - (Number(a.valor_pago) || 0);
-          %>
+             const restante  = (Number(a.valor) || 0) - (Number(a.valor_pago) || 0); %>
           <tr class="<%= (isVencido && restante > 0) ? 'table-vencido' : '' %>">
 
             <td>
-              <% if (isVencido && a.status === "pendente") { %>
+              <% if (isVencido && a.status === 'pendente') { %>
                 <i class="bi bi-exclamation-triangle-fill text-danger me-1" title="Agendamento vencido"></i>
               <% } %>
               <%= a.cliente %>
             </td>
-            
+
             <td><%= a.telefone %></td>
-            <td><%= a.cpf || "" %></td>
+            <td><%= a.cpf || '' %></td>
             <td><%= a.servico %></td>
             <td><%= a.valor ? 'R$ ' + Number(a.valor).toFixed(2) : '' %></td>
             <td><%= a.valor_pago ? 'R$ ' + Number(a.valor_pago).toFixed(2) : '' %></td>
-            <td><%= 'R$ ' + restante.toFixed(2) %></td>
+            <td>R$ <%= restante.toFixed(2) %></td>
+
             <td class="text-center">
-              <%
-                const total = Number(a.valor) || 0;
-                const pago = Number(a.valor_pago) || 0;
-                const restantePagto = total - pago;
-                let statusPagto = '';
-                let badgePagto = '';
-                // AQUI: vencido só destaca se pendente, passou data, e não foi pago totalmente
-                if (restantePagto <= 0) {
-                  statusPagto = 'Pago';
-                  badgePagto = 'bg-success';
-                } else if (pago > 0 && pago < total) {
-                  statusPagto = 'Parcial';
-                  badgePagto = 'bg-warning text-dark';
-                } else {
-                  statusPagto = 'Em aberto';
-                  badgePagto = 'bg-secondary';
-                }
-              %>
-              <% if (isVencido && restantePagto > 0) { %>
+              <% const pago = Number(a.valor_pago)||0;
+                 const badge = restante<=0 ? 'bg-success'
+                           : pago>0 ? 'bg-warning text-dark'
+                           : 'bg-secondary';
+                 const texto = restante<=0 ? 'Pago'
+                           : pago>0 ? 'Parcial' : 'Em aberto'; %>
+
+              <% if (isVencido && restante>0) { %>
                 <span class="badge badge-vencido">
-                  <i class="bi bi-exclamation-triangle-fill" style="margin-right:6px;font-size:1.1em;vertical-align:middle"></i>
-                  Em aberto (Vencido)
+                  <i class="bi bi-exclamation-triangle-fill me-1"></i>Em aberto (Vencido)
                 </span>
               <% } else { %>
-                <span class="badge <%= badgePagto %>"><%= statusPagto %></span>
+                <span class="badge <%= badge %>"><%= texto %></span>
               <% } %>
             </td>
-                      
-            
-            <td><%= a.datahora.replace("T", " ") %></td>
+
+            <td><%= a.datahora.replace('T',' ') %></td>
             <td>
-              <% if (a.funcionaria === "marcones") { %> Sogra (Marcones)
-              <% } else if (a.funcionaria === "analaura") { %> Ana Laura
-              <% } else if (a.funcionaria === "luiza") { %> Luiza
-              <% } else { %> <%= a.funcionaria %> <% } %>
+              <%= {marcones:'Sogra (Marcones)',analaura:'Ana Laura',luiza:'Luiza'}[a.funcionaria] || a.funcionaria %>
             </td>
+
             <td>
-              <form method="post" action="/atualizar-status/<%= a.id %>" style="display:inline;">
-                <select name="status" class="form-select form-select-sm d-inline" style="width:auto;display:inline-block" onchange="this.form.submit()">
-                  <option value="pendente" <%= a.status === "pendente" ? "selected" : "" %>>
-                    <%= isVencido ? "Aguardando (Vencido)" : "Pendente" %>
+              <form action="/atualizar-status/<%= a.id %>" method="post" style="display:inline;">
+                <select name="status" class="form-select form-select-sm"
+                        style="width:auto" onchange="this.form.submit()">
+                  <option value="pendente" <%= a.status==='pendente'?'selected':'' %>>
+                    <%= isVencido ? 'Aguardando (Vencido)' : 'Pendente' %>
                   </option>
-                  <option value="compareceu" <%= a.status === "compareceu" ? "selected" : "" %>>Compareceu</option>
-                  <option value="nao_compareceu" <%= a.status === "nao_compareceu" ? "selected" : "" %>>Não compareceu</option>
+                  <option value="compareceu"    <%= a.status==='compareceu'?'selected':'' %>>Compareceu</option>
+                  <option value="nao_compareceu" <%= a.status==='nao_compareceu'?'selected':'' %>>Não compareceu</option>
                 </select>
               </form>
             </td>
+
             <td class="d-flex flex-column gap-1">
-              <!-- Botão Modal Pagamento -->
-              <button type="button" class="btn btn-sm btn-success"
-                onclick="abrirModalPagamento(<%= a.id %>, '<%= a.cliente %>', <%= restante %>)">
+              <button class="btn btn-sm btn-success"
+                      onclick="abrirModalPagamento(<%= a.id %>,'<%= a.cliente %>',<%= restante %>)">
                 + Pagamento
               </button>
 
-              <!-- Botão Apagar -->
-              <form method="post" action="/apagar/<%= a.id %>"
-                    onsubmit="<%= a.status === 'compareceu' ? 'return false;' : 'return confirm(\'Tem certeza que deseja apagar este agendamento?\')' %>">
-                <button type="submit" class="btn btn-sm btn-danger"
-                        <%= a.status === 'compareceu' ? 'disabled style="opacity:0.6;cursor:not-allowed;"' : '' %>>
+              <form action="/apagar/<%= a.id %>" method="post"
+                onsubmit="<%= a.status==='compareceu' ? 'return false;' :
+                           'return confirm(\'Tem certeza que deseja apagar este agendamento?\')' %>">
+          
+                <button class="btn btn-sm btn-danger"
+                        <%= a.status==='compareceu' ? 'disabled style=\"opacity:.6;cursor:not-allowed;\"':'' %>>
                   Apagar
                 </button>
               </form>
             </td>
           </tr>
-          <% }); %>
+        <% }); %>
         </tbody>
       </table>
+    </div><!-- /.table-responsive -->
+
+    <!-- barra-fake BOTTOM -->
+    <div class="scrollbar-clone" style="margin-top:4px">
+      <div class="spacer"></div>
     </div>
-  </div>
+
+  </div><!-- /.table-scroll-wrapper -->
+</div><!-- /.card -->
+
+
 
 <!-- Cards Mobile -->
 <div class="mobile-cards mb-4">
@@ -671,6 +744,139 @@ tr.bg-warning-vencido:hover {
   });
 </script>
 
+
+<script>
+  async function carregarAgendamentos(filtro = 'todos') {
+    try {
+      const res = await fetch(`/agendamentos?filtro=${filtro}`);
+      if (!res.ok) throw new Error('Erro ao carregar agendamentos');
+      const agendamentos = await res.json();
+
+      const tbody = document.querySelector('table tbody');
+      tbody.innerHTML = ''; // limpa linhas atuais
+
+      agendamentos.forEach(a => {
+        const isVencido = a.status === 'pendente' && new Date(a.datahora) < new Date();
+        const restante = (Number(a.valor) || 0) - (Number(a.valor_pago) || 0);
+
+        const tr = document.createElement('tr');
+        if (isVencido && restante > 0) tr.classList.add('table-vencido');
+
+        tr.innerHTML = `
+          <td>${isVencido && a.status === "pendente" ? '<i class="bi bi-exclamation-triangle-fill text-danger me-1" title="Agendamento vencido"></i>' : ''}${a.cliente}</td>
+          <td>${a.telefone}</td>
+          <td>${a.cpf || ''}</td>
+          <td>${a.servico}</td>
+          <td>${a.valor ? 'R$ ' + Number(a.valor).toFixed(2) : ''}</td>
+          <td>${a.valor_pago ? 'R$ ' + Number(a.valor_pago).toFixed(2) : ''}</td>
+          <td>R$ ${restante.toFixed(2)}</td>
+          <td class="text-center">
+            ${
+              isVencido && restante > 0
+              ? `<span class="badge badge-vencido">
+                  <i class="bi bi-exclamation-triangle-fill" style="margin-right:6px;font-size:1.1em;vertical-align:middle"></i>
+                  Em aberto (Vencido)
+                </span>`
+              : (() => {
+                const total = Number(a.valor) || 0;
+                const pago = Number(a.valor_pago) || 0;
+                const restantePagto = total - pago;
+                if (restantePagto <= 0) return '<span class="badge bg-success">Pago</span>';
+                if (pago > 0 && pago < total) return '<span class="badge bg-warning text-dark">Parcial</span>';
+                return '<span class="badge bg-secondary">Em aberto</span>';
+              })()
+            }
+          </td>
+          <td>${a.datahora.replace('T', ' ')}</td>
+          <td>${a.funcionaria}</td>
+          <td>
+            <form method="post" action="/atualizar-status/${a.id}" style="display:inline;">
+              <select name="status" class="form-select form-select-sm d-inline" style="width:auto;display:inline-block" onchange="this.form.submit()">
+                <option value="pendente" ${a.status === 'pendente' ? 'selected' : ''}>${isVencido ? 'Aguardando (Vencido)' : 'Pendente'}</option>
+                <option value="compareceu" ${a.status === 'compareceu' ? 'selected' : ''}>Compareceu</option>
+                <option value="nao_compareceu" ${a.status === 'nao_compareceu' ? 'selected' : ''}>Não compareceu</option>
+              </select>
+            </form>
+          </td>
+          <td class="d-flex flex-column gap-1">
+            <button type="button" class="btn btn-sm btn-success"
+              onclick="abrirModalPagamento(${a.id}, '${a.cliente}', ${restante})">
+              + Pagamento
+            </button>
+            <form method="post" action="/apagar/${a.id}"
+                  onsubmit="${a.status === 'compareceu' ? 'return false;' : 'return confirm(\'Tem certeza que deseja apagar este agendamento?\')'}">
+              <button type="submit" class="btn btn-sm btn-danger"
+                      ${a.status === 'compareceu' ? 'disabled style="opacity:0.6;cursor:not-allowed;"' : ''}>
+                Apagar
+              </button>
+            </form>
+          </td>
+        `;
+
+        tbody.appendChild(tr);
+      });
+    } catch (err) {
+      console.error(err);
+      alert('Erro ao carregar agendamentos');
+    }
+  }
+
+  // Atualiza a tabela ao carregar a página, usando o filtro atual da URL
+  document.addEventListener('DOMContentLoaded', () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const filtro = urlParams.get('filtro') || 'todos';
+    carregarAgendamentos(filtro);
+  });
+
+  // Escuta cliques nos botões filtro para carregar os dados via AJAX sem recarregar
+  document.querySelectorAll('a.btn-outline-primary').forEach(link => {
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      const url = new URL(link.href);
+      const filtro = url.searchParams.get('filtro') || 'todos';
+      carregarAgendamentos(filtro);
+      // Atualiza URL sem recarregar a página
+      history.pushState(null, '', link.href);
+
+      // Atualiza visual do botão ativo
+      document.querySelectorAll('a.btn-outline-primary').forEach(btn => btn.classList.remove('active'));
+      link.classList.add('active');
+    });
+  });
+
+
+  
+</script>
+
+
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const wrapper  = document.querySelector('.table-scroll-wrapper');
+    const tableWr  = wrapper.querySelector('.table-responsive');
+    const clones   = wrapper.querySelectorAll('.scrollbar-clone');
+  
+    if (!tableWr || clones.length === 0) return;
+  
+    // ajusta largura dos spacers
+    const ajustarLargura = () =>
+      clones.forEach(cl => cl.querySelector('.spacer').style.width = tableWr.scrollWidth + 'px');
+    ajustarLargura();
+    window.addEventListener('resize', ajustarLargura);
+  
+    // mantém todos os scrolls sincronizados
+    const sync = elem => {
+      const x = elem.scrollLeft;
+      clones.forEach(c => { if (c !== elem) c.scrollLeft = x; });
+      if (tableWr !== elem) tableWr.scrollLeft = x;
+    };
+  
+    clones.forEach(c => c.addEventListener('scroll', () => sync(c)));
+    tableWr.addEventListener('scroll', () => sync(tableWr));
+  });
+  </script>
+  
+  
 
 </body>
 </html>

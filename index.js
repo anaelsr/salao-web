@@ -556,6 +556,36 @@ app.post("/pagamento", (req, res) => {
       }
     );
   });
+
+  app.get('/agendamentos', (req, res) => {
+    if (!req.session.user) return res.status(401).json({ error: "Não autorizado" });
+  
+    const filtro = req.query.filtro || "todos";
+  
+    let sql = `
+    SELECT a.*,
+           IFNULL(SUM(p.valor_pago), 0) AS valor_pago,
+           a.valor - IFNULL(SUM(p.valor_pago), 0) AS valor_restante
+    FROM agendamentos a
+    LEFT JOIN pagamentos p ON a.id = p.agendamento_id
+    `;
+    let params = [];
+  
+    if (filtro === "dia") {
+      sql += " WHERE date(datahora) = date('now', 'localtime')";
+    } else if (filtro === "semana") {
+      sql += " WHERE date(datahora) >= date('now', '-6 days', 'localtime')";
+    } else if (filtro === "mes") {
+      sql += " WHERE strftime('%Y-%m', datahora) = strftime('%Y-%m', 'now', 'localtime')";
+    }
+    sql += " GROUP BY a.id ORDER BY datahora";
+  
+    db.all(sql, params, (err, agendamentos) => {
+      if (err) return res.status(500).json({ error: err.message });
+      res.json(agendamentos);
+    });
+  });
+  
   
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, '0.0.0.0', () => {
