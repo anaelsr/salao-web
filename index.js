@@ -240,16 +240,30 @@ app.get('/clientes/autocomplete', (req, res) => {
   );
 });
 
-// Página de consulta de clientes
 app.get("/clientes", (req, res) => {
   if (!req.session.user) return res.redirect("/login");
-  db.all("SELECT * FROM clientes ORDER BY nome", [], (err, clientes) => {
+  const { busca, status } = req.query;
+
+  let where = [];
+  let params = [];
+
+  if (typeof status !== 'undefined' && status !== '' && (status === '1' || status === '0')) {
+    where.push('ativo = ?');
+    params.push(Number(status));
+  }
+  if (busca && busca.trim()) {
+    where.push('(nome LIKE ? OR telefone LIKE ? OR cpf LIKE ?)');
+    params.push(`%${busca}%`, `%${busca}%`, `%${busca}%`);
+  }
+  const sql = `SELECT * FROM clientes${where.length ? ' WHERE ' + where.join(' AND ') : ''} ORDER BY nome`;
+  db.all(sql, params, (err, clientes) => {
     if (err) {
-      return res.render("clientes", { clientes: [], error: "Erro ao buscar clientes." });
+      return res.render("clientes", { clientes: [], error: "Erro ao buscar clientes.", query: req.query });
     }
-    res.render("clientes", { clientes, error: null });
+    res.render("clientes", { clientes, error: null, query: req.query });
   });
 });
+
 
 // Página de consulta do horário do cliente (GET)
 app.get("/meuhorario", (req, res) => {
@@ -693,6 +707,24 @@ app.get('/agenda/lista', (req, res) => {
   );
 });
 
+
+// Editar cliente (nome e telefone)
+app.post('/clientes/editar/:id', express.json(), (req, res) => {
+  const id = req.params.id;
+  const { nome, telefone } = req.body;
+  db.run("UPDATE clientes SET nome = ?, telefone = ? WHERE id = ?", [nome, telefone, id], err => {
+    if (err) return res.status(500).json({ error: 'Erro ao editar.' });
+    res.status(200).json({ ok: true });
+  });
+});
+
+// Inativar cliente (define um campo 'ativo' = 0, precisa criar no banco se ainda não existe)
+app.post('/clientes/inativar/:id', (req, res) => {
+  db.run("UPDATE clientes SET ativo = 0 WHERE id = ?", [req.params.id], err => {
+    if (err) return res.status(500).json({ error: 'Erro ao inativar.' });
+    res.status(200).json({ ok: true });
+  });
+});
 
 
 
