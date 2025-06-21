@@ -11,6 +11,14 @@ app.use(express.static("public"));
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 
+
+
+// Função para remover acentos e deixar minúsculo
+function normalize(str) {
+  return str
+    ? str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase()
+    : "";
+}
 // Cria tabelas se não existirem (NÃO usa nascimento)
 db.serialize(() => {
   db.run(`CREATE TABLE IF NOT EXISTS users (
@@ -586,6 +594,108 @@ app.post("/pagamento", (req, res) => {
     });
   });
   
+
+  app.get('/agenda', (req, res) => {
+    if (!req.session.user) return res.redirect('/login');
+    db.all("SELECT nome FROM funcionarios WHERE status='Ativo' ORDER BY nome", [], (err, funcs) => {
+      res.render('agenda', { user: req.session.user, funcs, query: req.query }); // <-- ESSA LINHA!
+    });
+  });
+  
+    
+
+  app.get('/agenda/events', (req, res) => {
+    if (!req.session.user) return res.status(401).json([]);
+  
+    const func = normalize(req.query.func || '');
+  
+    // Filtro SQL para remover acentos e minúsculas
+    let where = '';
+    let params = [];
+    if (func) {
+      where = `
+        AND lower(
+          replace(
+            replace(
+              replace(
+                replace(
+                  replace(
+                    replace(
+                      replace(
+                        replace(
+                          replace(
+                            replace(
+                              a.funcionaria,
+                              'á','a'
+                            ), 'à','a'
+                          ), 'ã','a'
+                        ), 'â','a'
+                      ), 'ä','a'
+                    ), 'é','e'
+                  ), 'è','e'
+                ), 'ê','e'
+              ), 'ë','e'
+            ), 'í','i'
+          )
+        ) = ?
+      `;
+      params = [func];
+    }
+  
+    const sql = `
+      SELECT a.id, a.cliente, a.servico, a.datahora,
+             a.status, a.valor, a.funcionaria,
+             IFNULL(SUM(p.valor_pago),0) AS pago
+        FROM agendamentos a
+   LEFT JOIN pagamentos p ON p.agendamento_id = a.id
+       WHERE 1=1 ${where}
+    GROUP BY a.id`;
+  
+    db.all(sql, params, (err, rows) => {
+      if (err) return res.json([]);
+  
+      const eventos = rows.map(a => {
+        const restante = (a.valor || 0) - (a.pago || 0);
+  
+        const cor =
+          restante <= 0                 ? '#22c55e' :       // Pago
+          a.status === 'compareceu'      ? '#0ea5e9' :       // Compareceu
+          a.status === 'nao_compareceu'  ? '#ef4444' :       // Vencido (falta)
+                                           '#facc15';        // Em aberto
+  
+        return {
+          id:    a.id,
+          title: `${a.cliente} – ${a.servico}`,
+          start: a.datahora,
+          backgroundColor: cor,
+          borderColor:     cor,
+          extendedProps: { status: a.status, restante }
+        };
+      });
+  
+      res.json(eventos);
+    });
+  });
+
+
+// Buscar agendamentos de um dia específico para visualização em lista
+app.get('/agenda/lista', (req, res) => {
+  if (!req.session.user) return res.status(401).json([]);
+  const dia = req.query.data; // formato 'YYYY-MM-DD'
+  if (!dia) return res.json([]);
+  db.all(
+    `SELECT * FROM agendamentos WHERE date(datahora) = ? ORDER BY datahora`,
+    [dia],
+    (err, rows) => {
+      if (err) return res.json([]);
+      res.json(rows);
+    }
+  );
+});
+
+
+
+
   
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, '0.0.0.0', () => {

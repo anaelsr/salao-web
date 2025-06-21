@@ -285,6 +285,67 @@ tr.bg-warning-vencido:hover {
 }
 
 
+.novo-agendamento-card {
+  border-radius: 22px;
+  box-shadow: 0 4px 30px #2222  !important;
+  border: none;
+  padding: 44px 36px 36px 36px !important;
+  background: #fff;
+}
+
+.novo-agendamento-card h2, .novo-agendamento-card h3, .novo-agendamento-card h4 {
+  font-weight: 800;
+  font-size: 2.05em;
+  margin-bottom: 1.1em;
+  letter-spacing: -0.5px;
+  color: #232c3d;
+}
+
+.novo-agendamento-card .form-label {
+  font-weight: 600;
+  font-size: 1em;
+  margin-bottom: 0.2em;
+  color: #46516b;
+}
+
+.novo-agendamento-card .form-control, 
+.novo-agendamento-card .form-select {
+  border-radius: 13px !important;
+  border: 2px solid #eaeef5 !important;
+  min-height: 56px;
+  background: #f9fbfd;
+  font-size: 1.09em;
+  font-weight: 500;
+  box-shadow: none !important;
+  transition: border 0.2s, box-shadow 0.2s;
+}
+
+.novo-agendamento-card .form-control:focus,
+.novo-agendamento-card .form-select:focus {
+  border: 2.2px solid #5a8fff !important;
+  background: #fff;
+  box-shadow: 0 1px 14px #88aaff13 !important;
+}
+
+.novo-agendamento-card .btn-success {
+  background: linear-gradient(90deg, #53e6b6 60%, #38c786 100%);
+  border-radius: 16px;
+  border: none;
+  font-weight: 700;
+  font-size: 1.16em;
+  min-height: 54px;
+  box-shadow: 0 2px 12px #38c78625;
+  letter-spacing: 0.05em;
+  transition: background .17s, box-shadow .15s, transform .09s;
+}
+
+.novo-agendamento-card .btn-success:hover, 
+.novo-agendamento-card .btn-success:focus {
+  background: linear-gradient(90deg, #41d9c7 70%, #34ba6a 100%);
+  box-shadow: 0 4px 32px #41d9c730;
+  transform: translateY(-2px) scale(1.03);
+}
+
 
 
   </style>
@@ -300,7 +361,7 @@ tr.bg-warning-vencido:hover {
   <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap">
     <h2 class="mb-0">Painel de Agendamentos</h2>
     <div class="mt-2 mt-md-0 d-flex align-items-center gap-2 flex-wrap">
-      <a href="/clientes" class="btn btn-outline-primary me-2">
+      <a href="/clientes" class="btn btn-primary me-2">
         <i class="bi bi-people"></i> Consultar Clientes
       </a>
       <a href="/servicos" class="btn btn-outline-secondary me-2">
@@ -312,13 +373,17 @@ tr.bg-warning-vencido:hover {
       <a href="/relatorio" class="btn btn-outline-dark me-2">
         <i class="bi bi-bar-chart"></i> Relatório
       </a>
+      <a href="/agenda" class="btn btn-outline-success me-2">
+        <i class="bi bi-calendar-event"></i> Agenda
+      </a>
       <span class="me-3">Olá, <b><%= user %></b></span>
       <a href="/logout" class="btn btn-outline-danger btn-sm">Sair</a>
     </div>
   </div>
 
   <!-- Formulário de novo agendamento -->
-  <div class="card p-3 mb-4">
+  <div class="card p-3 mb-4 novo-agendamento-card">
+
     <h4 class="mb-3">Novo Agendamento</h4>
     <form method="post" action="/agendar" onsubmit="return validarFormulario();">
       <div class="row g-3">
